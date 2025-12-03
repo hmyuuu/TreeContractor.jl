@@ -1,20 +1,28 @@
 name = "TreeContractor"
 uuid = "9c73e9a1-f3ff-4299-8ff4-9ebd1df36108"
-authors = ["nzy1997"]
 version = "1.0.0-DEV"
+authors = ["nzy1997"]
 
 [deps]
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 OMEinsum = "ebe7aa44-baf0-506c-a96f-8464559b3922"
+ProfileView = "c46f51b8-102a-5cf2-8d2c-8597cb0e0da7"
+TensorQEC = "0500ac79-7fb5-4262-aaea-37bb1845d1ef"
 
 [compat]
+JSON = "0.21.4"
 LinearAlgebra = "1.11.0"
 OMEinsum = "0.8,0.9"
+ProfileView = "1.10.2"
+TensorQEC = "2.2.1"
 julia = "1"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+BenchmarkTools = "6e4b80f9-63af-4b35-86b1-d3f60ab8c7ce"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test","Random"]
+benchmark = ["BenchmarkTools", "Random"]
+test = ["Test", "Random"]
