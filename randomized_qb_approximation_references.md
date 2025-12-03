@@ -27,7 +27,9 @@ Randomized QB approximation refers to randomized algorithms for computing low-ra
 
 **Reference**: 
 - SIAM Review, 53(2), 217-288, 2011
-- arXiv:0909.4061
+- arXiv: https://arxiv.org/abs/0909.4061
+- DOI: https://doi.org/10.1137/090771806
+- PDF: https://arxiv.org/pdf/0909.4061.pdf
 
 ### 2. Randomized QR with Column Pivoting
 **Title**: Various papers on randomized QRCP (QR with Column Pivoting)
@@ -39,7 +41,11 @@ Randomized QB approximation refers to randomized algorithms for computing low-ra
 
 **Reference**:
 - Martinsson, Rokhlin, Tygert (2006): "A randomized algorithm for the decomposition of matrices"
+  - Applied and Computational Harmonic Analysis
+  - DOI: https://doi.org/10.1016/j.acha.2005.11.002
 - Gu, Eisenstat (1996): "Efficient algorithms for computing a strong rank-revealing QR factorization"
+  - SIAM J. Sci. Comput., 17(4), 848-869
+  - DOI: https://doi.org/10.1137/S106482759528912X
 
 ### 3. Block Randomized Algorithms
 **Title**: Block-based randomized algorithms for large-scale matrix computations
@@ -51,7 +57,9 @@ Randomized QB approximation refers to randomized algorithms for computing low-ra
 
 **Reference**:
 - Duersch, Gu (2020): "Randomized QR with Column Pivoting"
-- SIAM J. Sci. Comput., 42(1), A405-A429
+  - SIAM J. Sci. Comput., 42(1), A405-A429
+  - DOI: https://doi.org/10.1137/18M1222740
+  - arXiv: https://arxiv.org/abs/1801.07599
 
 ### 4. Applications to Tensor Networks
 **Title**: Randomized methods for tensor decompositions
@@ -64,7 +72,9 @@ Randomized QB approximation refers to randomized algorithms for computing low-ra
 
 **Reference**:
 - Oseledets, Tyrtyshnikov (2010): "TT-cross approximation for multidimensional arrays"
-- Related work on randomized tensor decompositions
+  - Linear Algebra and its Applications, 432(1), 70-88
+  - DOI: https://doi.org/10.1016/j.laa.2009.07.024
+  - arXiv: https://arxiv.org/abs/0809.3197
 
 ## Comparison: Randomized QB vs Randomized SVD
 
@@ -164,19 +174,27 @@ For a matrix A with exact rank k:
 
 1. **Halko, Martinsson, Tropp (2011)**: Foundational paper on randomized matrix decompositions
    - SIAM Review 53(2), 217-288
-   - arXiv:0909.4061
+   - arXiv: https://arxiv.org/abs/0909.4061
+   - DOI: https://doi.org/10.1137/090771806
+   - PDF: https://arxiv.org/pdf/0909.4061.pdf
 
 2. **Martinsson, Rokhlin, Tygert (2006)**: Randomized algorithms for matrix decomposition
    - Applied and Computational Harmonic Analysis
+   - DOI: https://doi.org/10.1016/j.acha.2005.11.002
 
 3. **Duersch, Gu (2020)**: Randomized QR with Column Pivoting
    - SIAM J. Sci. Comput. 42(1), A405-A429
+   - DOI: https://doi.org/10.1137/18M1222740
+   - arXiv: https://arxiv.org/abs/1801.07599
 
 4. **Oseledets, Tyrtyshnikov (2010)**: TT-cross approximation (related tensor methods)
-   - Linear Algebra and its Applications
+   - Linear Algebra and its Applications, 432(1), 70-88
+   - DOI: https://doi.org/10.1016/j.laa.2009.07.024
+   - arXiv: https://arxiv.org/abs/0809.3197
 
 5. **Gu, Eisenstat (1996)**: Efficient rank-revealing QR factorization
    - SIAM J. Sci. Comput. 17(4), 848-869
+   - DOI: https://doi.org/10.1137/S106482759528912X
 
 ## Conclusion
 
