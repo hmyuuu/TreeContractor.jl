@@ -53,16 +53,127 @@ function _code2mps!(code::DynamicNestedEinsum{LT}, labels::Vector{LT}, apply_vec
     return nothing
 end
 
-function apply_tensors!(mps::LabeledMPS, apply_vec::Vector{Int}, tensors::Vector{<:AbstractArray{T}}, tensor_labels::Vector{Vector{LT}}, vanish_labels_vec::Vector{Vector{LT}}; maxdim = Inf) where {T<:Number, LT}
-    for (i,label, vanish_labels) in zip(apply_vec, tensor_labels, vanish_labels_vec)
+"""
+    apply_tensors!(mps, apply_vec, tensors, tensor_labels, vanish_labels_vec; atol, maxdim, compress_ratio)
+
+Apply multiple tensors to the MPS with lazy compression.
+Compression is triggered when bond dimension exceeds `compress_ratio * maxdim`.
+
+Optimal `compress_ratio` is typically 2.0-3.0 (allows some bond growth before compressing).
+"""
+function apply_tensors!(mps::LabeledMPS, apply_vec::Vector{Int}, tensors::Vector{<:AbstractArray{T}}, tensor_labels::Vector{Vector{LT}}, vanish_labels_vec::Vector{Vector{LT}}; atol::Real=1e-12, maxdim::Int=typemax(Int), compress_ratio::Real=2.0) where {T<:Number, LT}
+    for (i, label, vanish_labels) in zip(apply_vec, tensor_labels, vanish_labels_vec)
+        # Check if we need compression after this tensor
         mps = apply_tensor!(mps, tensors[i], label, vanish_labels)
-        # @info  mps.tensors .|> size
-        if maximum(size.(mps.tensors,1)) > maxdim
-            compress!(FullCompress(), mps; maxdim)
-            # @info "compress"
-            # @info  mps.tensors .|> size
+        
+        max_bond = maximum(max(size(t, 1), size(t, 3)) for t in mps.tensors)
+        if max_bond > compress_ratio * maxdim
+            # Use contract_with_compress! logic: single compression sweep
+            compress!(FullCompress(), mps; atol, maxdim)
         end
     end
+    # Final compression to ensure maxdim constraint
+    max_bond = maximum(max(size(t, 1), size(t, 3)) for t in mps.tensors)
+    if max_bond > maxdim
+        compress!(FullCompress(), mps; atol, maxdim)
+    end
+    return mps
+end
+
+"""
+    apply_tensors_with_compress!(mps, apply_vec, tensors, tensor_labels, vanish_labels_vec; atol, maxdim)
+
+Apply multiple tensors to MPS, compressing after EACH tensor application using `contract_with_compress!`.
+This is more accurate but slower than lazy compression.
+"""
+function apply_tensors_with_compress!(mps::LabeledMPS, apply_vec::Vector{Int}, tensors::Vector{<:AbstractArray{T}}, tensor_labels::Vector{Vector{LT}}, vanish_labels_vec::Vector{Vector{LT}}; atol::Real=1e-12, maxdim::Int=typemax(Int)) where {T<:Number, LT}
+    for (i, label, vanish_labels) in zip(apply_vec, tensor_labels, vanish_labels_vec)
+        # Apply tensor AND compress in single sweep using contract_with_compress!
+        mps = contract_with_compress!(mps, tensors[i], label, vanish_labels; atol, maxdim)
+    end
+    return mps
+end
+
+"""
+    local_truncate!(mps::LabeledMPS, atol::Real, maxdim::Int)
+
+Single left-to-right sweep with local SVD truncation at each bond.
+Much faster than full compression - just truncates bonds without building environments.
+"""
+function local_truncate!(mps::LabeledMPS{T}, atol::RT, maxdim::Int) where {RT, T<:Union{RT,Complex{RT}}}
+    # Single sweep left to right, truncating each bond
+    for i in 1:nsite(mps)-1
+        # Reshape tensor i: (left, phys, right) -> (left*phys, right)
+        left_dim, phys_dim, right_dim = size(mps.tensors[i])
+        mat = reshape(mps.tensors[i], left_dim * phys_dim, right_dim)
+        
+        # Truncated SVD
+        U, S, V, _ = truncated_svd(mat, atol, maxdim)
+        
+        # Update tensor i
+        mps.tensors[i] = reshape(U, left_dim, phys_dim, size(U, 2))
+        
+        # Contract S*V into tensor i+1
+        SV = Diagonal(S) * V
+        mps.tensors[i+1] = ein"ij, jak -> iak"(SV, mps.tensors[i+1])
+    end
+    mps.center = nsite(mps)
+    return mps
+end
+
+"""
+    apply_tensors_single_sweep!(mps, apply_vec, tensors, tensor_labels, vanish_labels_vec; atol, maxdim)
+
+Apply tensors with LESS frequent compression (ratio=3.0), then ONE final density matrix sweep.
+Faster than compress_every for many tensors, similar to lazy but ensures one final optimal compression.
+"""
+function apply_tensors_single_sweep!(mps::LabeledMPS{T}, apply_vec::Vector{Int}, tensors::Vector{<:AbstractArray{T2}}, tensor_labels::Vector{Vector{LT}}, vanish_labels_vec::Vector{Vector{LT}}; atol::RT=1e-12, maxdim::Int=typemax(Int)) where {RT, T<:Union{RT,Complex{RT}}, T2<:Number, LT}
+    
+    # Forward pass: apply tensors with infrequent compression (ratio=3.0)
+    compress_threshold = 3 * maxdim
+    
+    for (i, label, vanish_labels) in zip(apply_vec, tensor_labels, vanish_labels_vec)
+        mps = apply_tensor!(mps, tensors[i], label, vanish_labels)
+        
+        # Compress less frequently than default lazy
+        max_bond = maximum(max(size(t, 1), size(t, 3)) for t in mps.tensors)
+        if max_bond > compress_threshold
+            compress!(FullCompress(), mps; atol, maxdim=compress_threshold)
+        end
+    end
+    
+    # Single backward compression sweep with full density matrix algorithm
+    nsite(mps) <= 1 && return mps
+    
+    MT = typeof(similar(mps.tensors[1], (1, 1)))
+    
+    # Build left environment tensors (once)
+    L = Vector{MT}(undef, nsite(mps))
+    L[1] = similar(mps.tensors[1], (1, 1))
+    fill!(L[1], one(T))
+    
+    for i in 1:nsite(mps)-1
+        L[i+1] = ein"(ik, iaj), kal->jl"(L[i], conj(mps.tensors[i]), mps.tensors[i])
+    end
+    
+    # Backward sweep: compress with density matrix
+    embed = similar(mps.tensors[end], (1, 1))
+    fill!(embed, one(T))
+    
+    for i in reverse(2:nsite(mps))
+        ρ = ein"(ik, (iaj, pj)), (kbl, ql)->apbq"(L[i], conj(mps.tensors[i]), conj(embed), mps.tensors[i], embed)
+        ρ = reshape(ρ, size(ρ, 1) * size(ρ, 2), size(ρ, 3) * size(ρ, 4)) |> Hermitian
+        
+        _, U, _ = truncated_eigen(ρ, atol, maxdim)
+        U = reshape(U', :, size(mps.tensors[i])[2], size(embed)[1])
+        
+        embed = ein"iaj, (paq, qj)->pi"(mps.tensors[i], conj(U), embed)
+        mps.tensors[i] = U
+    end
+    
+    mps.tensors[1] = ein"iaj, pj->iap"(mps.tensors[1], embed)
+    mps.center = 1
+    
     return mps
 end
 
@@ -182,9 +293,32 @@ end
 contract_mps(mps::LabeledMPS) = contract_mps(mps.tensors)
 
 
-function contract_with_mps(optcode::DynamicNestedEinsum{LT}, tensors::Vector{<:AbstractArray{T}}, size_dict::Dict{LT, Int};maxdim = Inf) where {T<:Number, LT}
+"""
+    contract_with_mps(optcode, tensors, size_dict; atol, maxdim, compress_ratio, single_sweep)
+
+Contract tensors using MPS representation with compression.
+
+# Keyword Arguments
+- `atol::Real=1e-12`: truncation tolerance
+- `maxdim::Int=typemax(Int)`: maximum bond dimension
+- `compress_ratio::Real=2.0`: compress when bond > compress_ratio * maxdim (lazy compression, optimal ~2.0-3.0)
+- `single_sweep::Bool=false`: if true, use local compression during forward pass, then one density matrix sweep
+- `compress_every::Bool=false`: if true, use `contract_with_compress!` after EVERY tensor (most accurate, slowest)
+"""
+function contract_with_mps(optcode::DynamicNestedEinsum{LT}, tensors::Vector{<:AbstractArray{T}}, size_dict::Dict{LT, Int}; atol::Real=1e-12, maxdim::Int=typemax(Int), compress_ratio::Real=2.0, single_sweep::Bool=false, compress_every::Bool=false) where {T<:Number, LT}
     mps, apply_vec, tensor_labels, vanish_labels_vec = code2mps(optcode, size_dict)
-    mps = apply_tensors!(mps, apply_vec, tensors, tensor_labels, vanish_labels_vec; maxdim)
+    
+    if compress_every
+        # Use contract_with_compress! after every tensor (most accurate)
+        mps = apply_tensors_with_compress!(mps, apply_vec, tensors, tensor_labels, vanish_labels_vec; atol, maxdim)
+    elseif single_sweep
+        # Apply all tensors with local truncation, then one density matrix sweep
+        mps = apply_tensors_single_sweep!(mps, apply_vec, tensors, tensor_labels, vanish_labels_vec; atol, maxdim)
+    else
+        # Lazy compression: compress when bond exceeds threshold (default, fastest)
+        mps = apply_tensors!(mps, apply_vec, tensors, tensor_labels, vanish_labels_vec; atol, maxdim, compress_ratio)
+    end
+    
     return mps.tensors
 end
 

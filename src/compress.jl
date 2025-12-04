@@ -178,24 +178,197 @@ function compress!(::FullCompress, mps::LabeledMPS{T}; atol::RT=1e-12, maxdim::I
     return mps
 end
 
+"""
+    contract_with_compress!(mps::LabeledMPS, tensor::AbstractArray, tensor_label::Vector, vanish_labels::Vector; atol::Real=1e-12, maxdim::Int=typemax(Int))
+
+Apply a tensor to the MPS and perform compression in a single sweep. This combines tensor application 
+with density matrix compression, applying the tensor at the relevant sites and compressing using 
+environment tensors.
+
+# Arguments
+- `mps::LabeledMPS`: the LabeledMPS to operate on
+- `tensor::AbstractArray{T}`: the tensor to apply
+- `tensor_label::Vector{LT}`: labels of the tensor indices
+- `vanish_labels::Vector{LT}`: labels that will be contracted away
+
+# Keyword arguments
+- `atol::Real=1e-12`: the truncation tolerance
+- `maxdim::Int=typemax(Int)`: the maximum bond dimension for truncation
+
+# Returns
+- `mps`: the LabeledMPS after tensor application and compression
+"""
+function contract_with_compress!(mps::LabeledMPS{T}, tensor::AbstractArray{T2}, tensor_label::Vector{LT}, vanish_labels::Vector{LT}; atol::RT=1e-12, maxdim::Int=typemax(Int)) where {RT, T<:Union{RT,Complex{RT}}, T2<:Number, LT}
+    # First apply the tensor
+    mps = apply_tensor!(mps, tensor, tensor_label, vanish_labels)
+    
+    # If MPS is too small, no compression needed
+    nsite(mps) <= 1 && return mps
+    
+    MT = typeof(similar(mps.tensors[1], (1, 1)))
+    
+    # Build left environment tensors
+    L = Vector{MT}(undef, nsite(mps))
+    L[1] = similar(mps.tensors[1], (1, 1))
+    fill!(L[1], one(T))
+    
+    # ╭─i─┬─j
+    # |   a
+    # ╰─k─┴─l
+    for i in 1:nsite(mps)-1
+        L[i+1] = ein"(ik, iaj), kal->jl"(L[i], conj(mps.tensors[i]), mps.tensors[i])
+    end
+    
+    # Sweep from right to left, compressing at each site
+    embed = similar(mps.tensors[end], (1, 1))
+    fill!(embed, one(T))
+    
+    for i in reverse(2:nsite(mps))
+        #     a   p
+        # ╭─i─┴─j─╯
+        # ╰─k─┬─l─╮
+        #     b   q
+        ρ = ein"(ik, (iaj, pj)), (kbl, ql)->apbq"(L[i], conj(mps.tensors[i]), conj(embed), mps.tensors[i], embed)
+        ρ = reshape(ρ, size(ρ, 1) * size(ρ, 2), size(ρ, 3) * size(ρ, 4)) |> Hermitian
+        
+        _, U, _ = truncated_eigen(ρ, atol, maxdim)
+        U = reshape(U', :, size(mps.tensors[i])[2], size(embed)[1])
+        
+        # ─p─┬─q─╮
+        #    a   |
+        # ─i─┴─j─╯
+        embed = ein"iaj, (paq, qj)->pi"(mps.tensors[i], conj(U), embed)
+        mps.tensors[i] = U
+    end
+    
+    mps.tensors[1] = ein"iaj, pj->iap"(mps.tensors[1], embed)
+    mps.center = 1
+    
+    return mps
+end
+
+# Threshold for using iterative methods vs full decomposition
+# Iterative methods have overhead; they're only faster for large matrices (n > 256) 
+# when requesting few eigenvalues (maxdim < n/4)
+const ITERATIVE_THRESHOLD = 256
+
 function truncated_svd(M::AbstractMatrix, atol::Real, maxdim::Int)
     @assert atol >= zero(atol) "Truncation tolerance must be nonnegative."
     @assert maxdim > 0 "Truncated bond dimension must be positive."
+    
+    m, n = size(M)
+    min_dim = min(m, n)
+    
+    # Use iterative SVD (via eigensolve of M'M or MM') for large matrices when maxdim is small
+    # Only beneficial when matrix is large AND we need few singular values
+    if min_dim > ITERATIVE_THRESHOLD && maxdim < min_dim ÷ 4
+        return _truncated_svd_iterative(M, atol, maxdim)
+    else
+        return _truncated_svd_full(M, atol, maxdim)
+    end
+end
 
+function _truncated_svd_full(M::AbstractMatrix, atol::Real, maxdim::Int)
     res = LinearAlgebra.svd(M)
     r = min(searchsortedfirst(res.S, atol; rev=true) - 1, maxdim, length(res.S))
+    r = max(r, 1)  # Ensure at least rank 1
+    trunc_error = r < length(res.S) ? sum(res.S[(r + 1):end] .^ 2) : zero(eltype(res.S))
+    return res.U[:, 1:r], res.S[1:r], res.Vt[1:r, :], trunc_error
+end
 
-    # Note: may have performance issue due to the copy
-    return res.U[:, 1:r], res.S[1:r], res.Vt[1:r, :], sum(res.S[(r + 1):end] .^ 2) # FIXME: why do such truncation?
+function _truncated_svd_iterative(M::AbstractMatrix{T}, atol::Real, maxdim::Int) where T
+    m, n = size(M)
+    
+    # Choose whether to work with M'M or MM' based on dimensions
+    if m >= n
+        # Work with M'M (n×n), get right singular vectors
+        MtM = M' * M
+        vals, vecs, info = eigsolve(MtM, min(maxdim + 5, n), :LR; krylovdim=max(30, 2*maxdim))
+        
+        # vals are eigenvalues of M'M = singular values squared
+        svals = sqrt.(real.(vals))
+        V = hcat(vecs...)  # Right singular vectors
+        
+        # Filter by tolerance
+        r = min(searchsortedfirst(svals, atol; rev=true) - 1, maxdim, length(svals))
+        r = max(r, 1)
+        
+        svals = svals[1:r]
+        V = V[:, 1:r]
+        
+        # Compute U = M * V * S^{-1}
+        U = M * V * Diagonal(1 ./ svals)
+        Vt = V'
+        
+        trunc_error = r < length(vals) ? sum(real.(vals[(r+1):end])) : zero(real(T))
+        return U, svals, Vt, trunc_error
+    else
+        # Work with MM' (m×m), get left singular vectors
+        MMt = M * M'
+        vals, vecs, info = eigsolve(MMt, min(maxdim + 5, m), :LR; krylovdim=max(30, 2*maxdim))
+        
+        svals = sqrt.(real.(vals))
+        U = hcat(vecs...)  # Left singular vectors
+        
+        # Filter by tolerance
+        r = min(searchsortedfirst(svals, atol; rev=true) - 1, maxdim, length(svals))
+        r = max(r, 1)
+        
+        svals = svals[1:r]
+        U = U[:, 1:r]
+        
+        # Compute V = S^{-1} * U' * M
+        Vt = Diagonal(1 ./ svals) * U' * M
+        
+        trunc_error = r < length(vals) ? sum(real.(vals[(r+1):end])) : zero(real(T))
+        return U, svals, Vt, trunc_error
+    end
 end
 
 function truncated_eigen(M::AbstractMatrix, atol::Real, maxdim::Int)
     @assert atol >= zero(atol) "Truncation tolerance must be nonnegative."
     @assert maxdim > 0 "Truncated bond dimension must be positive."
-
-    res = LinearAlgebra.eigen(M; sortby=x -> -x)
-    r = min(searchsortedfirst(res.values, atol; rev=true) - 1, maxdim, length(res.values))
-
-    # Note: may have performance issue due to the copy
-    return res.values[1:r], res.vectors[:, 1:r], sum(res.values[(r + 1):end] .^ 2) # FIXME: why do such truncation?
+    
+    n = size(M, 1)
+    
+    # Use iterative eigensolver for large matrices when maxdim is small
+    # Only beneficial when matrix is large AND we need few eigenvalues
+    if n > ITERATIVE_THRESHOLD && maxdim < n ÷ 4
+        return _truncated_eigen_iterative(M, atol, maxdim)
+    else
+        return _truncated_eigen_full(M, atol, maxdim)
+    end
 end
+
+function _truncated_eigen_full(M::AbstractMatrix, atol::Real, maxdim::Int)
+    res = LinearAlgebra.eigen(Hermitian(M); sortby=x -> -x)
+    r = min(searchsortedfirst(res.values, atol; rev=true) - 1, maxdim, length(res.values))
+    r = max(r, 1)  # Ensure at least rank 1
+    trunc_error = r < length(res.values) ? sum(res.values[(r + 1):end] .^ 2) : zero(eltype(res.values))
+    return res.values[1:r], res.vectors[:, 1:r], trunc_error
+end
+
+function _truncated_eigen_iterative(M::AbstractMatrix{T}, atol::Real, maxdim::Int) where T
+    n = size(M, 1)
+    
+    # Use KrylovKit's eigsolve for largest eigenvalues
+    # Request a few extra to handle tolerance filtering
+    num_vals = min(maxdim + 5, n)
+    vals, vecs, info = eigsolve(Hermitian(M), num_vals, :LR; krylovdim=max(30, 2*maxdim))
+    
+    # Convert to real (eigenvalues of Hermitian are real)
+    real_vals = real.(vals)
+    
+    # Filter by tolerance
+    r = min(searchsortedfirst(real_vals, atol; rev=true) - 1, maxdim, length(real_vals))
+    r = max(r, 1)
+    
+    filtered_vals = real_vals[1:r]
+    filtered_vecs = hcat(vecs[1:r]...)
+    
+    # Estimate truncation error (sum of discarded eigenvalues squared)
+    trunc_error = r < length(real_vals) ? sum(real_vals[(r+1):end] .^ 2) : zero(real(T))
+    
+    return filtered_vals, filtered_vecs, trunc_error
+end
+

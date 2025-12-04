@@ -24,6 +24,7 @@ contraction_complexity(ct.optcode,uniformsize(ct.optcode,2))
 
 ct2 = compile(TNMMAP(OMEinsum.PathSA(),true),dem)
 
-@time contract_with_mps(ct2.optcode, ct2.tensors, uniformsize(ct2.optcode,2); maxdim = 20)
-@time contract_with_mps(ct2.optcode, ct2.tensors, uniformsize(ct2.optcode,2); maxdim = 50)
-@time contract_with_mps(ct2.optcode, ct2.tensors, uniformsize(ct2.optcode,2); maxdim = 80)
+@time contract_with_mps(ct2.code, ct2.tensors, uniformsize(ct2.code,2); maxdim = 20)
+@time contract_with_mps(ct2.code, ct2.tensors, uniformsize(ct2.code,2); maxdim = 50)
+@time contract_with_mps(ct2.code, ct2.tensors, uniformsize(ct2.code,2); maxdim = 80)
+@time contract_with_mps(ct2.code, ct2.tensors, uniformsize(ct2.code,2); maxdim = 20, compress_every = true)
