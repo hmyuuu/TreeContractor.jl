@@ -16,6 +16,63 @@ end
 
 nsite(mps::LabeledMPS) = length(mps.labels)
 num_of_elements(mps::LabeledMPS) = sum(length, mps.tensors)
+maxlinkdim(mps::LabeledMPS) = maximum(max(size(t, 1), size(t, 3)) for t in mps.tensors)
+
+"""
+    LabeledMPO{T<:Number, AT<:AbstractArray{T,4}, LT}
+
+A Matrix Product Operator (MPO) with labeled physical indices.
+Each tensor has shape: (left virtual, top physical/bra, bottom physical/ket, right virtual)
+"""
+struct LabeledMPO{T<:Number, AT<:AbstractArray{T,4}, LT}
+    # rank-4 tensors: left virtual, top physical (bra), bottom physical (ket), right virtual
+    # left/right virtual bond set to be of dimension 1 at the most left/right
+    tensors::Vector{AT}
+    labels::Vector{LT}
+    label_to_index::Dict{LT, Int}
+    function LabeledMPO(tensors::Vector{AT}, labels::Vector{LT}) where {T<:Number, AT<:AbstractArray{T,4}, LT}
+        @assert length(tensors) == length(labels) "LabeledMPO must have the same number of tensors and labels"
+        @assert size(tensors[1], 1) == 1 "Left virtual bond must have dimension 1"
+        @assert size(tensors[end], 4) == 1 "Right virtual bond must have dimension 1"
+        label_to_index = Dict{LT, Int}(zip(labels, 1:length(labels)))
+        new{T, AT, LT}(tensors, labels, label_to_index)
+    end
+end
+
+nsite(mpo::LabeledMPO) = length(mpo.labels)
+num_of_elements(mpo::LabeledMPO) = sum(length, mpo.tensors)
+maxlinkdim(mpo::LabeledMPO) = maximum(max(size(t, 1), size(t, 4)) for t in mpo.tensors)
+
+"""
+    nflavor(mps::LabeledMPS)
+
+Return the physical dimension of the MPS (assuming uniform physical dimension).
+"""
+nflavor(mps::LabeledMPS) = size(mps.tensors[1], 2)
+
+"""
+    nflavor(mpo::LabeledMPO)
+
+Return the physical dimension of the MPO (assuming uniform physical dimension).
+Returns the ket (bottom) physical dimension.
+"""
+nflavor(mpo::LabeledMPO) = size(mpo.tensors[1], 3)
+
+"""
+    random_mpo(::Type{T}, N::Int; maxdim::Int, d::Int=2, amplitude::Real=1.0) where T
+
+Create a random MPO with `N` sites, physical dimension `d`, and maximum bond dimension `maxdim`.
+"""
+function random_mpo(::Type{T}, N::Int; maxdim::Int, d::Int=2, amplitude::Real=1.0) where T
+    @assert N > 0 "Number of sites must be positive, got: $N"
+    @assert maxdim > 0 "Maximum bond dimension must be positive, got: $maxdim"
+    @assert d > 0 "Physical dimension must be greater than 0, got: $d"
+    # Bond dimension grows as d^2 for MPO
+    return LabeledMPO([T(amplitude) .* randn(T, min((d^2)^(i-1), (d^2)^(N-i+1), maxdim), d, d, min((d^2)^i, (d^2)^(N-i), maxdim)) for i in 1:N], [i for i in 1:N])
+end
+
+Base.copy(mps::LabeledMPS) = LabeledMPS(copy.(mps.tensors), copy(mps.labels))
+Base.copy(mpo::LabeledMPO) = LabeledMPO(copy.(mpo.tensors), copy(mpo.labels))
 
 function code2mps(code::DynamicNestedEinsum{LT}, size_dict::Dict{LT, Int}) where LT
     # labels = Vector{LT}()
@@ -53,6 +110,12 @@ function _code2mps!(code::DynamicNestedEinsum{LT}, labels::Vector{LT}, apply_vec
     return nothing
 end
 
+"""
+    apply_tensors!(mps::LabeledMPS, apply_vec, tensors, tensor_labels, vanish_labels_vec; maxdim=Inf)
+
+Apply tensors to MPS with post-hoc compression when bond dimension exceeds `maxdim`.
+This is the original implementation that applies then compresses.
+"""
 function apply_tensors!(mps::LabeledMPS, apply_vec::Vector{Int}, tensors::Vector{<:AbstractArray{T}}, tensor_labels::Vector{Vector{LT}}, vanish_labels_vec::Vector{Vector{LT}}; maxdim = Inf) where {T<:Number, LT}
     for (i,label, vanish_labels) in zip(apply_vec, tensor_labels, vanish_labels_vec)
         mps = apply_tensor!(mps, tensors[i], label, vanish_labels)
@@ -66,6 +129,37 @@ function apply_tensors!(mps::LabeledMPS, apply_vec::Vector{Int}, tensors::Vector
     return mps
 end
 
+"""
+    apply_tensors!(mode::CompressAlgorithm, mps::LabeledMPS, apply_vec, tensors, tensor_labels, vanish_labels_vec; atol=1e-12, maxdim=Inf)
+
+Apply tensors to MPS with integrated compression using the specified algorithm.
+The `mode` can be either `LocalCompress()` (zip-up) or `FullCompress()` (density matrix).
+
+# Arguments
+- `mode`: the compression algorithm to use during tensor application
+- `mps`: the MPS to apply tensors to
+- `apply_vec`: vector of tensor indices to apply
+- `tensors`: vector of tensors to apply
+- `tensor_labels`: labels for each tensor's indices
+- `vanish_labels_vec`: labels to contract (vanish) for each tensor
+
+# Keyword arguments
+- `atol`: truncation tolerance for SVD/eigendecomposition
+- `maxdim`: maximum bond dimension
+"""
+function apply_tensors!(mode::CompressAlgorithm, mps::LabeledMPS, apply_vec::Vector{Int}, tensors::Vector{<:AbstractArray{T}}, tensor_labels::Vector{Vector{LT}}, vanish_labels_vec::Vector{Vector{LT}}; atol::Real=1e-12, maxdim::Int=typemax(Int)) where {T<:Number, LT}
+    for (i,label, vanish_labels) in zip(apply_vec, tensor_labels, vanish_labels_vec)
+        mps = apply_tensor!(mode, mps, tensors[i], label, vanish_labels; atol, maxdim)
+    end
+    return mps
+end
+
+"""
+    apply_tensor!(mps::LabeledMPS, tensor, tensor_label, vanish_labels)
+
+Apply a tensor to MPS at positions specified by `tensor_label`, contracting indices in `vanish_labels`.
+This is the original implementation without integrated compression.
+"""
 function apply_tensor!(mps::LabeledMPS, tensor::AbstractArray{T}, tensor_label::Vector{LT}, vanish_labels::Vector{LT}) where {T<:Number, LT}
     @assert length(tensor_label) == length(size(tensor)) "tensor_label and the dimension of tensor are not compatible"
     for (i,l) in enumerate(tensor_label)
@@ -121,21 +215,85 @@ function apply_tensor!(mps::LabeledMPS, tensor::AbstractArray{T}, tensor_label::
     return mps
 end
 
-#          o-g-        
+"""
+    apply_tensor!(::LocalCompress, mps::LabeledMPS, tensor, tensor_label, vanish_labels; atol=1e-12, maxdim=typemax(Int))
+
+Apply a tensor to MPS with zip-up (local) compression.
+First applies the tensor, then performs local SVD sweeps for compression only when needed.
+
+# Algorithm
+This implements a two-stage approach:
+1. Apply tensor to affected sites
+2. Handle vanishing labels
+3. Apply local SVD compression sweeps (zip-up style) only if bond dimensions exceed maxdim
+
+# References
+- https://tensornetwork.org/mps/algorithms/zip_up_mpo/
+"""
+function apply_tensor!(::LocalCompress, mps::LabeledMPS{T1}, tensor::AbstractArray{T2}, tensor_label::Vector{LT}, vanish_labels::Vector{LT}; atol::Real=1e-12, maxdim::Int=typemax(Int)) where {T1<:Number, T2<:Number, LT}
+    # First apply the tensor without compression
+    mps = apply_tensor!(mps, tensor, tensor_label, vanish_labels)
+
+    # Then compress using local SVD sweeps (zip-up style) only if needed
+    # Optimized: check max bond dimension efficiently
+    if maxdim < typemax(Int)
+        max_bond = maxlinkdim(mps)
+        if max_bond > maxdim
+            compress!(LocalCompress(), mps; niters=1, atol, maxdim)
+        end
+    end
+
+    return mps
+end
+
+"""
+    apply_tensor!(::FullCompress, mps::LabeledMPS, tensor, tensor_label, vanish_labels; atol=1e-12, maxdim=typemax(Int))
+
+Apply a tensor to MPS with density matrix (full) compression.
+First applies the tensor, then uses the density matrix method for optimal global compression only when needed.
+
+# Algorithm
+This implements a two-stage approach:
+1. Apply tensor to affected sites
+2. Handle vanishing labels
+3. Apply global density matrix compression to the entire MPS only if bond dimensions exceed maxdim
+
+# References
+- https://tensornetwork.org/mps/algorithms/denmat_mpo_mps/
+"""
+function apply_tensor!(::FullCompress, mps::LabeledMPS{T1}, tensor::AbstractArray{T2}, tensor_label::Vector{LT}, vanish_labels::Vector{LT}; atol::Real=1e-12, maxdim::Int=typemax(Int)) where {T1<:Number, T2<:Number, LT}
+    # First apply the tensor without compression
+    mps = apply_tensor!(mps, tensor, tensor_label, vanish_labels)
+
+    # Then compress using the density matrix method on the full MPS only if needed
+    # Optimized: check max bond dimension efficiently
+    if maxdim < typemax(Int)
+        max_bond = maxlinkdim(mps)
+        if max_bond > maxdim
+            compress!(FullCompress(), mps; atol, maxdim)
+        end
+    end
+
+    return mps
+end
+
+#          o-g-
 #   d| e/ f|     =>   d|     f| g/
 # -a-o--b--o-c-     -a-o--be--o-c-
+# Optimized version: pre-compiled einsum for better performance
+const _apply_rank_3_einsum = ein"bfc,efg->befcg"
 function apply_rank_3_tensor(tensor::AbstractArray{T,3}, merge_tensor::AbstractArray{T,3}) where T
-    merge_code = ein"bfc,efg->befcg"
-    m = merge_code(tensor, merge_tensor)
+    m = _apply_rank_3_einsum(tensor, merge_tensor)
     return reshape(m, size(m,1)*size(m,2), size(m,3), size(m,4)*size(m,5))
 end
 
-#          o-g-        
+#          o-g-
 #   d| e/ f|     =>   d|       g/
 # -a-o--b--o-c-     -a-o--be--o-c-
+# Optimized version: pre-compiled einsum for better performance
+const _apply_rank_3_vanish_einsum = ein"bfc,efg->becg"
 function apply_rank_3_tensor_with_vanish(tensor::AbstractArray{T,3}, merge_tensor::AbstractArray{T,3}) where T
-    merge_code = ein"bfc,efg->becg"
-    m = merge_code(tensor, merge_tensor)
+    m = _apply_rank_3_vanish_einsum(tensor, merge_tensor)
     return reshape(m, size(m,1)*size(m,2), size(m,3)*size(m,4),1)
 end
 
@@ -182,9 +340,36 @@ end
 contract_mps(mps::LabeledMPS) = contract_mps(mps.tensors)
 
 
+"""
+    contract_with_mps(optcode, tensors, size_dict; maxdim=Inf)
+
+Contract tensors following the optimized einsum code using MPS representation.
+Uses post-hoc compression when bond dimension exceeds `maxdim`.
+"""
 function contract_with_mps(optcode::DynamicNestedEinsum{LT}, tensors::Vector{<:AbstractArray{T}}, size_dict::Dict{LT, Int};maxdim = Inf) where {T<:Number, LT}
     mps, apply_vec, tensor_labels, vanish_labels_vec = code2mps(optcode, size_dict)
     mps = apply_tensors!(mps, apply_vec, tensors, tensor_labels, vanish_labels_vec; maxdim)
+    return mps.tensors
+end
+
+"""
+    contract_with_mps(mode::CompressAlgorithm, optcode, tensors, size_dict; atol=1e-12, maxdim=typemax(Int))
+
+Contract tensors following the optimized einsum code using MPS representation with integrated compression.
+
+# Arguments
+- `mode`: compression algorithm, either `LocalCompress()` (zip-up) or `FullCompress()` (density matrix)
+- `optcode`: optimized einsum contraction code
+- `tensors`: vector of tensors to contract
+- `size_dict`: dictionary mapping index labels to dimensions
+
+# Keyword arguments
+- `atol`: truncation tolerance
+- `maxdim`: maximum bond dimension
+"""
+function contract_with_mps(mode::CompressAlgorithm, optcode::DynamicNestedEinsum{LT}, tensors::Vector{<:AbstractArray{T}}, size_dict::Dict{LT, Int}; atol::Real=1e-12, maxdim::Int=typemax(Int)) where {T<:Number, LT}
+    mps, apply_vec, tensor_labels, vanish_labels_vec = code2mps(optcode, size_dict)
+    mps = apply_tensors!(mode, mps, apply_vec, tensors, tensor_labels, vanish_labels_vec; atol, maxdim)
     return mps.tensors
 end
 

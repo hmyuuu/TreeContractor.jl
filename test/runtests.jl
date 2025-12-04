@@ -207,3 +207,146 @@ end
 
     @test contract_with_mps(optcode, tensors, uniformsize(code, bd); maxdim = 10)[1][1,:,1] ≈ right_answer atol = 1e-10
 end
+
+###### Tests for MPO-MPS Application ######
+
+@testset "LabeledMPO construction" begin
+    Random.seed!(42)
+    N, d, χ = 5, 2, 4
+    
+    # Create random MPO
+    mpo = TreeContractor.random_mpo(ComplexF64, N; maxdim=χ, d=d)
+    
+    @test TreeContractor.nsite(mpo) == N
+    @test TreeContractor.nflavor(mpo) == d
+    @test size(mpo.tensors[1], 1) == 1  # Left boundary
+    @test size(mpo.tensors[end], 4) == 1  # Right boundary
+    
+    # Check all tensors have correct physical dimensions
+    for t in mpo.tensors
+        @test size(t, 2) == d  # bra physical
+        @test size(t, 3) == d  # ket physical
+    end
+end
+
+@testset "LocalCompress apply_tensor! basic" begin
+    Random.seed!(42)
+    
+    # Simple test: apply a tensor to MPS and verify it gives same result as original
+    code = ein"abc,abd->"
+    optcode = optimize_code(code, uniformsize(code, 2), OMEinsum.PathSA())
+    
+    t1 = rand(2,2,2)
+    t2 = rand(2,2,2)
+    tensors = [t1, t2]
+    right_answer = optcode(t1, t2)[]
+    
+    # Test with LocalCompress - should give same result with no truncation
+    result = contract_with_mps(TreeContractor.LocalCompress(), optcode, tensors, uniformsize(code, 2); maxdim=100)
+    @test result[1][] ≈ right_answer atol=1e-10
+end
+
+###### Tests for dispatch-based apply_tensor! ######
+
+@testset "apply_tensors! with LocalCompress mode" begin
+    code = ein"abc,cde,egh,fbg->"
+    bd = 3
+    optcode = optimize_code(code, uniformsize(code, bd), OMEinsum.PathSA())
+
+    Random.seed!(1234)
+    t1 = rand(bd,bd,bd)
+    t2 = rand(bd,bd,bd)
+    t3 = rand(bd,bd,bd)
+    t4 = rand(bd,bd,bd)
+    
+    tensors = [t1, t2, t3, t4]
+    right_answer = optcode(tensors...)[]
+    
+    # Test with LocalCompress mode
+    result = contract_with_mps(TreeContractor.LocalCompress(), optcode, tensors, uniformsize(code, bd); maxdim=20)
+    @test result[1][] ≈ right_answer atol=1e-8
+end
+
+@testset "apply_tensors! with FullCompress mode" begin
+    code = ein"abc,cde,egh,fbg->"
+    bd = 3
+    optcode = optimize_code(code, uniformsize(code, bd), OMEinsum.PathSA())
+
+    Random.seed!(1234)
+    t1 = rand(bd,bd,bd)
+    t2 = rand(bd,bd,bd)
+    t3 = rand(bd,bd,bd)
+    t4 = rand(bd,bd,bd)
+    
+    tensors = [t1, t2, t3, t4]
+    right_answer = optcode(tensors...)[]
+    
+    # Test with FullCompress mode
+    result = contract_with_mps(TreeContractor.FullCompress(), optcode, tensors, uniformsize(code, bd); maxdim=20)
+    @test result[1][] ≈ right_answer atol=1e-8
+end
+
+@testset "apply_tensors! compression effectiveness" begin
+    code = ein"abc,cde,egh,fbg,yczd,ybzc->"
+    bd = 4
+    optcode = optimize_code(code, uniformsize(code, bd), OMEinsum.PathSA())
+
+    Random.seed!(5678)
+    t1 = rand(bd,bd,bd)
+    t2 = rand(bd,bd,bd)
+    t3 = rand(bd,bd,bd)
+    t4 = rand(bd,bd,bd)
+    t5 = rand(bd,bd,bd,bd)
+    t6 = rand(bd,bd,bd,bd)
+
+    tensors = [t1, t2, t3, t4, t5, t6]
+    right_answer = optcode(tensors...)[]
+    
+    maxdim_test = 8
+    
+    # Test LocalCompress
+    result_local = contract_with_mps(TreeContractor.LocalCompress(), optcode, tensors, uniformsize(code, bd); maxdim=maxdim_test)
+    
+    # Test FullCompress  
+    result_full = contract_with_mps(TreeContractor.FullCompress(), optcode, tensors, uniformsize(code, bd); maxdim=maxdim_test)
+    
+    # Both should give reasonable approximations
+    @test abs(result_local[1][] - right_answer) / abs(right_answer) < 0.5
+    @test abs(result_full[1][] - right_answer) / abs(right_answer) < 0.5
+end
+
+@testset "MPO helper functions" begin
+    Random.seed!(42)
+    N, d, χ = 6, 3, 5
+    
+    mpo = TreeContractor.random_mpo(ComplexF64, N; maxdim=χ, d=d)
+    mps = TreeContractor.random_mps(ComplexF64, N; maxdim=χ, d=d)
+    
+    @test TreeContractor.nsite(mpo) == N
+    @test TreeContractor.nsite(mps) == N
+    @test TreeContractor.nflavor(mpo) == d
+    @test TreeContractor.nflavor(mps) == d
+    @test TreeContractor.maxlinkdim(mpo) > 0
+    @test TreeContractor.maxlinkdim(mps) > 0
+    @test TreeContractor.num_of_elements(mpo) > 0
+    @test TreeContractor.num_of_elements(mps) > 0
+end
+
+@testset "MPO/MPS copy" begin
+    Random.seed!(42)
+    N, d, χ = 4, 2, 3
+    
+    mps = TreeContractor.random_mps(ComplexF64, N; maxdim=χ, d=d)
+    mpo = TreeContractor.random_mpo(ComplexF64, N; maxdim=χ, d=d)
+    
+    mps_copy = copy(mps)
+    mpo_copy = copy(mpo)
+    
+    # Modify originals
+    mps.tensors[1] .= 0
+    mpo.tensors[1] .= 0
+    
+    # Copies should be unchanged
+    @test !all(mps_copy.tensors[1] .== 0)
+    @test !all(mpo_copy.tensors[1] .== 0)
+end

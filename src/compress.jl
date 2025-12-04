@@ -107,32 +107,7 @@ function Base.:(*)(coeff::Number, mps::LabeledMPS{T}) where {T}
 end
 
 ###### Operations ######
-abstract type CompressAlgorithm end
-
-"""
-    LocalCompress <: CompressAlgorithm
-
-LocalCompress algorithm for compressing an LabeledMPS. It performs local SVDs and updates the LabeledMPS tensors serially, so the precision is not guaranteed.
-
-In the scenario of applying MPO to LabeledMPS, it is also called Zipup algorithm, which compresses the network of LabeledMPS with MPO into a single LabeledMPS.
-
-# References
-- https://tensornetwork.org/mps/algorithms/zip_up_mpo/
-"""
-struct LocalCompress <: CompressAlgorithm end
-
-"""
-    FullCompress <: CompressAlgorithm
-
-FullCompress algorithm for compressing an LabeledMPS. It takes environment tensors into account and performs global SVDs, so the precision is guaranteed.
-
-In the scenario of applying MPO to LabeledMPS, it is also called Density Matrix algorithm, which compresses the network of LabeledMPS with MPO into a single LabeledMPS.
-
-# References
-- https://tensornetwork.org/mps/index.html#compression
-- https://tensornetwork.org/mps/algorithms/denmat_mpo_mps/
-"""
-struct FullCompress <: CompressAlgorithm end
+# CompressAlgorithm, LocalCompress, and FullCompress are defined in TreeContractor.jl
 
 function compress!(::LocalCompress, mps::LabeledMPS{T}; niters::Int=1, atol::RT=1e-12, maxdim::Int=typemax(Int)) where {RT,T<:Union{RT,Complex{RT}}}
     # Start from right canonical form
@@ -175,6 +150,140 @@ function compress!(::FullCompress, mps::LabeledMPS{T}; atol::RT=1e-12, maxdim::I
     mps.tensors[1] = ein"iaj, pj->iap"(mps.tensors[1], embed)
     mps.center = 1 # update canonical center
 
+    return mps
+end
+
+###### MPO-MPS Application with Compression ######
+
+"""
+    apply!(mode::CompressAlgorithm, mpo::LabeledMPO{T}, mps::LabeledMPS{T}; atol=1e-12, maxdim=maxlinkdim(mps) * maxlinkdim(mpo)) where {T}
+
+Apply the MPO to the MPS using the `mode` algorithm, contracting and compressing simultaneously.
+
+# Arguments
+- `mode`: the algorithm to use for the application, either `LocalCompress()` (zip-up) or `FullCompress()` (density matrix)
+- `mpo`: the MPO to apply
+- `mps`: the MPS to apply the MPO to
+
+# Keyword arguments
+- `atol`: the truncation tolerance for the SVD/eigendecomposition
+- `maxdim`: the maximum bond dimension for the SVD/eigendecomposition
+
+# Returns
+- `mps`: the MPS after the application (modified in-place)
+
+# References
+- Zip-up (LocalCompress): https://tensornetwork.org/mps/algorithms/zip_up_mpo/
+- Density Matrix (FullCompress): https://tensornetwork.org/mps/algorithms/denmat_mpo_mps/
+"""
+function apply!(::LocalCompress, mpo::LabeledMPO{T}, mps::LabeledMPS{T}; atol::RT=1e-12, maxdim::Int=maxlinkdim(mps) * maxlinkdim(mpo)) where {RT,T<:Union{RT,Complex{RT}}}
+    @assert nsite(mpo) == nsite(mps) "MPO and MPS must have the same number of sites"
+    @assert nflavor(mpo) == nflavor(mps) "MPO and MPS must have the same physical dimension"
+
+    # Zip-up algorithm: sweep from left to right
+    # Index convention for MPO tensor: (left_virtual, bra_physical, ket_physical, right_virtual) = (m, b, a, n)
+    # Index convention for MPS tensor: (left_virtual, physical, right_virtual) = (i, a, j)
+    # 
+    # After applying MPO to MPS at site, the exact result is:
+    # mps(i,a,j) * mpo(m,b,a,n) -> (i,m,b,j,n) reshape to (i*m, b, j*n)
+    #
+    # L_env connects the truncated left bond to the combined (mps_left, mpo_left) space
+    # L_env shape: (truncated_left, mps_left, mpo_left)
+    L_env = ones(T, 1, 1, 1)
+    
+    for i in 1:nsite(mps)-1
+        # Contract: L_env(l,i,m) * mps[i](i,a,j) * mpo[i](m,b,a,n) -> (l,b,j,n)
+        # Physical index 'a' connects MPS to MPO ket
+        # Output physical index is 'b' (MPO bra)
+        # Right indices: (j,n) = (mps_right, mpo_right) to match exact order
+        temp = ein"(lim, iaj), mban->lbjn"(L_env, mps.tensors[i], mpo.tensors[i])
+        
+        # SVD to truncate: reshape to (l*b, j*n) and decompose
+        temp_mat = reshape(temp, size(temp, 1) * size(temp, 2), size(temp, 3) * size(temp, 4))
+        U, S, V, _ = truncated_svd(temp_mat, atol, maxdim)
+        
+        # U becomes the new MPS tensor at site i: (l, b, new_bond)
+        mps.tensors[i] = reshape(U, size(temp, 1), size(temp, 2), size(U, 2))
+        
+        # S*V becomes the new L_env: (new_bond, j, n) = (new_bond, mps_right, mpo_right)
+        L_env = reshape(Diagonal(S) * V, size(U, 2), size(temp, 3), size(temp, 4))
+    end
+    
+    # Last site: absorb the remaining L_env
+    # Contract: L_env(l,i,m) * mps[end](i,a,j) * mpo[end](m,b,a,n) -> (l,b,j,n)
+    # Since it's the last site, j=1 and n=1, so reshape to (l,b,1)
+    temp = ein"(lim, iaj), mban->lbjn"(L_env, mps.tensors[end], mpo.tensors[end])
+    mps.tensors[end] = reshape(temp, size(temp, 1), size(temp, 2), size(temp, 3) * size(temp, 4))
+    
+    # Update canonical center (result is right-canonical except for last site)
+    mps.center = nsite(mps)
+    return mps
+end
+
+function apply!(::FullCompress, mpo::LabeledMPO{T}, mps::LabeledMPS{T}; atol::RT=1e-12, maxdim::Int=maxlinkdim(mps) * maxlinkdim(mpo)) where {RT,T<:Union{RT,Complex{RT}}}
+    @assert nsite(mpo) == nsite(mps) "MPO and MPS must have the same number of sites"
+    @assert nflavor(mpo) == nflavor(mps) "MPO and MPS must have the same physical dimension"
+
+    # Density matrix algorithm for MPO-MPS application
+    # Index convention for MPO tensor: (left_virtual, bra_physical, ket_physical, right_virtual) = (m, b, a, n)
+    # Index convention for MPS tensor: (left_virtual, physical, right_virtual) = (i, a, j)
+    #
+    # The result of MPO|ψ⟩ at site i is:
+    #   mps(i,a,j) * mpo(m,b,a,n) -> (i,m,b,j,n) reshape to (i*m, b, j*n)
+    
+    N = nsite(mps)
+    
+    # Step 1: First apply MPO to MPS to get the full (uncompressed) result
+    # Store the combined tensors before compression
+    combined = Vector{Array{T,3}}(undef, N)
+    for i in 1:N
+        # Contract MPS with MPO: mps(i,a,j) * mpo(m,b,a,n) -> (i,m,b,j,n)
+        temp = ein"iaj, mban->imbjn"(mps.tensors[i], mpo.tensors[i])
+        combined[i] = reshape(temp, 
+            size(mps.tensors[i], 1) * size(mpo.tensors[i], 1),
+            size(mpo.tensors[i], 2),
+            size(mps.tensors[i], 3) * size(mpo.tensors[i], 4))
+    end
+    
+    # Step 2: Build left environment tensors for the combined state
+    # L[i] has indices (bra, ket) for the density matrix of the left part
+    MT = typeof(similar(mps.tensors[1], (1, 1)))
+    L = Vector{MT}(undef, N)
+    L[1] = similar(mps.tensors[1], (1, 1))
+    fill!(L[1], one(T))
+    
+    # ╭─i─┬─j
+    # |   a
+    # ╰─k─┴─l
+    for i in 1:N-1
+        L[i+1] = ein"(ik, iaj), kal->jl"(L[i], conj(combined[i]), combined[i])
+    end
+    
+    # Step 3: Sweep R→L computing reduced density matrix and optimal projectors
+    embed = similar(mps.tensors[end], (1, 1))
+    fill!(embed, one(T))
+    
+    for i in reverse(2:N)
+        #     a   p
+        # ╭─i─┴─j─╯
+        # ╰─k─┬─l─╮
+        #     b   q
+        ρ = ein"(ik, (iaj, pj)), (kbl, ql)->apbq"(L[i], conj(combined[i]), conj(embed), combined[i], embed)
+        ρ = reshape(ρ, size(ρ, 1) * size(ρ, 2), size(ρ, 3) * size(ρ, 4)) |> Hermitian
+
+        _, U, _ = truncated_eigen(ρ, atol, maxdim)
+        U = reshape(U', :, size(combined[i], 2), size(embed, 1))
+        
+        # ─p─┬─q─╮
+        #    a   |
+        # ─i─┴─j─╯
+        embed = ein"iaj, (paq, qj)->pi"(combined[i], conj(U), embed)
+        mps.tensors[i] = U
+    end
+    
+    mps.tensors[1] = ein"iaj, pj->iap"(combined[1], embed)
+    mps.center = 1
+    
     return mps
 end
 

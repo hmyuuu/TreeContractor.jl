@@ -7,7 +7,7 @@ dem = TensorQEC.parse_dem_file("examples/data/surface_code_d=3_r=3.dem")
 
 ct = compile(TNMMAP(TreeSA(),true),dem)
 
-contraction_complexity(ct.optcode,uniformsize(ct.optcode,2))
+contraction_complexity(ct.code,uniformsize(ct.code,2))
 
 # Random.seed!(1234)
 # ep = random_error_qubits(dem)
@@ -16,7 +16,7 @@ contraction_complexity(ct.optcode,uniformsize(ct.optcode,2))
 # TensorQEC.update_syndrome!(ct,syd)
 # TensorQEC.update_syndrome!(ct2,syd)
 
-@time ct.optcode(ct.tensors...)
+@time ct.code(ct.tensors...)
 #   0.007278 seconds (113.39 k allocations: 7.312 MiB)
 # 2-element Vector{Float64}:
 #  0.8426216150912986
@@ -24,6 +24,7 @@ contraction_complexity(ct.optcode,uniformsize(ct.optcode,2))
 
 ct2 = compile(TNMMAP(OMEinsum.PathSA(),true),dem)
 
-@time contract_with_mps(ct2.optcode, ct2.tensors, uniformsize(ct2.optcode,2); maxdim = 20)
-@time contract_with_mps(ct2.optcode, ct2.tensors, uniformsize(ct2.optcode,2); maxdim = 50)
-@time contract_with_mps(ct2.optcode, ct2.tensors, uniformsize(ct2.optcode,2); maxdim = 80)
+@time contract_with_mps(TreeContractor.FullCompress(), ct2.code, ct2.tensors, uniformsize(ct2.code,2); maxdim = 20)
+@time contract_with_mps(TreeContractor.FullCompress(), ct2.code, ct2.tensors, uniformsize(ct2.code,2); maxdim = 50)
+@time contract_with_mps(TreeContractor.FullCompress(), ct2.code, ct2.tensors, uniformsize(ct2.code,2); maxdim = 80)
+
