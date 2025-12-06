@@ -31,8 +31,8 @@
         mps = TreeContractor.random_mps(T, N; maxdim=χ)
         original_vec = vec(mps)
 
-        # Default SymmetricSVD for numerical stability
-        TreeContractor.canonicalize!(mps, center)
+        # Use SymmetricSVD with NoTrackNorm to verify tensor values are preserved
+        TreeContractor.canonicalize!(mps, center, TreeContractor.SymmetricSVD(), TreeContractor.NoTrackNorm())
 
         @test TreeContractor.orthocenter(mps) == center
         @test TreeContractor.is_canonicalized(mps)
