@@ -1,63 +1,146 @@
+###### SVD Distribution Strategies ######
+"""
+    SVDDistribution
+
+Abstract type for SVD distribution strategies during canonicalization.
+"""
+abstract type SVDDistribution end
+
+"""
+    SymmetricSVD <: SVDDistribution
+
+Distribute √S to both sides of SVD for numerical stability.
+This balances tensor magnitudes but breaks strict isometry.
+"""
+struct SymmetricSVD <: SVDDistribution end
+
+"""
+    IsometricSVD <: SVDDistribution
+
+Standard canonical form where one side gets U (or V) as isometry
+and the other side absorbs S. Maintains strict isometry property.
+"""
+struct IsometricSVD <: SVDDistribution end
+
+###### Norm Tracking Strategies ######
+"""
+    NormTracking
+
+Abstract type for norm tracking strategies during canonicalization.
+"""
+abstract type NormTracking end
+
+"""
+    TrackLognorm <: NormTracking
+
+Extract scale factors during SVD and accumulate in mps.lognorm.
+Useful for tensor networks with extreme norm values.
+"""
+struct TrackLognorm <: NormTracking end
+
+"""
+    NoTrackNorm <: NormTracking
+
+Do not track norm during canonicalization (default behavior).
+"""
+struct NoTrackNorm <: NormTracking end
+
 ###### Canonicalization related APIs ######
 is_canonicalized(mps::LabeledMPS) = mps.center !== -1
 orthocenter(mps::LabeledMPS) = is_canonicalized(mps) ? mps.center : nothing
 
 """
-    canonicalize!(mps::LabeledMPS, i::Int; atol::Real=1e-12, maxdim::Int=typemax(Int))
+    canonicalize!(mps::LabeledMPS, i::Int, [svd_dist], [norm_track]; atol, rtol, maxdim)
 
-Canonicalize the LabeledMPS, with the canonical center at site `i`. If the LabeledMPS is already canonicalized, move the center to site `i`.
+Canonicalize the LabeledMPS, with the canonical center at site `i`.
 
 # Arguments
 - `mps::LabeledMPS`: the LabeledMPS to canonicalize
 - `i::Int`: the site index of the canonical center
-- `atol::Real=1e-12`: the truncation error
-- `maxdim::Int=typemax(Int)`: the maximum bond dimension for truncation
+- `svd_dist::SVDDistribution=SymmetricSVD()`: SVD distribution strategy
+- `norm_track::NormTracking=TrackLognorm()`: norm tracking strategy
+- `atol::Real=1e-12`: absolute truncation tolerance
+- `rtol::Real=0.0`: relative truncation tolerance
+- `maxdim::Int=typemax(Int)`: maximum bond dimension
 """
-function canonicalize!(mps::LabeledMPS{T}, i::Int; atol::RT=1e-12, maxdim::Int=typemax(Int)) where {RT,T<:Union{RT,Complex{RT}}}
+function canonicalize!(mps::LabeledMPS{T}, i::Int, svd_dist::SVDDistribution=SymmetricSVD(), norm_track::NormTracking=TrackLognorm(); atol::RT=1e-12, rtol::RT=zero(RT), maxdim::Int=typemax(Int)) where {RT,T<:Union{RT,Complex{RT}}}
     n = nsite(mps)
     @assert 1 <= i <= n "Center index i must be between 1 and $n"
 
     if is_canonicalized(mps)  # move center
         for center in mps.center+1:i     # right moving
-            canonical_move_right!(mps, atol, maxdim)
+            canonical_move_right!(mps, svd_dist, norm_track, atol, rtol, maxdim)
         end
         for center in mps.center-1:-1:i  # left moving
-            canonical_move_left!(mps, atol, maxdim)
+            canonical_move_left!(mps, svd_dist, norm_track, atol, rtol, maxdim)
         end
         return mps
     else   # initialize center
         mps.center = 1
         for center in 2:i  # right moving
-            canonical_move_right!(mps, atol, maxdim)
+            canonical_move_right!(mps, svd_dist, norm_track, atol, rtol, maxdim)
         end
 
         mps.center = n
         for center in n-1:-1:i  # left moving
-            canonical_move_left!(mps, atol, maxdim)
+            canonical_move_left!(mps, svd_dist, norm_track, atol, rtol, maxdim)
         end
 
         return mps
     end
 end
 
-function canonical_move_right!(mps::LabeledMPS, atol::Real, maxdim::Int)
+# Scale tracking dispatch
+track_scale!(::NoTrackNorm, mps::LabeledMPS, S) = S
+function track_scale!(::TrackLognorm, mps::LabeledMPS, S)
+    isempty(S) && return S
+    scale = S[1]
+    mps.lognorm += log(scale)
+    return S ./ scale
+end
+
+# SVD distribution dispatch - move right
+function distribute_svd_right!(::SymmetricSVD, mps::LabeledMPS, j::Int, U, S, V)
+    sqrtS = sqrt.(S)
+    mps.tensors[j] = reshape(U * Diagonal(sqrtS), size(mps.tensors[j])[1:2]..., :)
+    mps.tensors[j + 1] = ein"(i, ij), jak->iak"(sqrtS, V, mps.tensors[j + 1])
+end
+
+function distribute_svd_right!(::IsometricSVD, mps::LabeledMPS, j::Int, U, S, V)
+    mps.tensors[j] = reshape(U, size(mps.tensors[j])[1:2]..., :)
+    mps.tensors[j + 1] = ein"(i, ij), jak->iak"(S, V, mps.tensors[j + 1])
+end
+
+# SVD distribution dispatch - move left
+function distribute_svd_left!(::SymmetricSVD, mps::LabeledMPS, j::Int, U, S, V)
+    sqrtS = sqrt.(S)
+    mps.tensors[j] = reshape(Diagonal(sqrtS) * V, :, size(mps.tensors[j])[2:3]...)
+    mps.tensors[j - 1] = ein"iaj, (jk, k)->iak"(mps.tensors[j - 1], U, sqrtS)
+end
+
+function distribute_svd_left!(::IsometricSVD, mps::LabeledMPS, j::Int, U, S, V)
+    mps.tensors[j] = reshape(V, :, size(mps.tensors[j])[2:3]...)
+    mps.tensors[j - 1] = ein"iaj, (jk, k)->iak"(mps.tensors[j - 1], U, S)
+end
+
+function canonical_move_right!(mps::LabeledMPS, svd_dist::SVDDistribution, norm_track::NormTracking, atol::Real, rtol::Real, maxdim::Int)
     @assert is_canonicalized(mps) "LabeledMPS is not canonicalized. Use canonicalize! first."
     @assert mps.center < nsite(mps) "Cannot move right from the rightmost site."
     j = mps.center
-    U, S, V, _ = truncated_svd(reshape(mps.tensors[j], :, size(mps.tensors[j])[3]), atol, maxdim)
-    mps.tensors[j] = reshape(U, size(mps.tensors[j])[1:2]..., :)
-    mps.tensors[j + 1] = ein"(i, ij), jak->iak"(S, V, mps.tensors[j + 1])
+    U, S, V, _ = truncated_svd(reshape(mps.tensors[j], :, size(mps.tensors[j])[3]), atol, rtol, maxdim)
+    S = track_scale!(norm_track, mps, S)
+    distribute_svd_right!(svd_dist, mps, j, U, S, V)
     mps.center += 1
     return mps
 end
 
-function canonical_move_left!(mps::LabeledMPS, atol::Real, maxdim::Int)
+function canonical_move_left!(mps::LabeledMPS, svd_dist::SVDDistribution, norm_track::NormTracking, atol::Real, rtol::Real, maxdim::Int)
     @assert is_canonicalized(mps) "LabeledMPS is not canonicalized. Use canonicalize! first."
     @assert mps.center > 1 "Cannot move left from the leftmost site."
     j = mps.center
-    U, S, V, _ = truncated_svd(reshape(mps.tensors[j], size(mps.tensors[j])[1], :), atol, maxdim)
-    mps.tensors[j] = reshape(V, :, size(mps.tensors[j])[2:3]...)
-    mps.tensors[j - 1] = ein"iaj, (jk, k)->iak"(mps.tensors[j - 1], U, S)
+    U, S, V, _ = truncated_svd(reshape(mps.tensors[j], size(mps.tensors[j])[1], :), atol, rtol, maxdim)
+    S = track_scale!(norm_track, mps, S)
+    distribute_svd_left!(svd_dist, mps, j, U, S, V)
     mps.center -= 1
     return mps
 end
@@ -134,16 +217,16 @@ In the scenario of applying MPO to LabeledMPS, it is also called Density Matrix 
 """
 struct FullCompress <: CompressAlgorithm end
 
-function compress!(::LocalCompress, mps::LabeledMPS{T}; niters::Int=1, atol::RT=1e-12, maxdim::Int=typemax(Int)) where {RT,T<:Union{RT,Complex{RT}}}
+function compress!(::LocalCompress, mps::LabeledMPS{T}, svd_dist::SVDDistribution=SymmetricSVD(), norm_track::NormTracking=TrackLognorm(); niters::Int=1, atol::RT=1e-12, rtol::RT=zero(RT), maxdim::Int=typemax(Int)) where {RT,T<:Union{RT,Complex{RT}}}
     # Start from right canonical form
     for _ in 1:niters
-        canonicalize!(mps, nsite(mps); atol, maxdim)
-        canonicalize!(mps, 1; atol, maxdim)
+        canonicalize!(mps, nsite(mps), svd_dist, norm_track; atol, rtol, maxdim)
+        canonicalize!(mps, 1, svd_dist, norm_track; atol, rtol, maxdim)
     end
     return mps
 end
 
-function compress!(::FullCompress, mps::LabeledMPS{T}; atol::RT=1e-12, maxdim::Int=typemax(Int)) where {RT,T<:Union{RT,Complex{RT}}}
+function compress!(::FullCompress, mps::LabeledMPS{T}; atol::RT=1e-12, rtol::RT=zero(RT), maxdim::Int=typemax(Int)) where {RT,T<:Union{RT,Complex{RT}}}
     MT = typeof(similar(mps.tensors[1], (1, 1))) # FIXME: better way to obtain <:AbstractArray{T, 2} from <:AbstractArray{T, 3}?
 
     # sweep from left to right to construct environment tensors
@@ -164,7 +247,7 @@ function compress!(::FullCompress, mps::LabeledMPS{T}; atol::RT=1e-12, maxdim::I
         ρ = ein"(ik, (iaj, pj)), (kbl, ql)->apbq"(L[i], conj(mps.tensors[i]), conj(embed), mps.tensors[i], embed)
         ρ = reshape(ρ, size(ρ, 1) * size(ρ, 2), size(ρ, 3) * size(ρ, 4)) |> Hermitian
 
-        _, U, _ = truncated_eigen(ρ, atol, maxdim)
+        _, U, _ = truncated_eigen(ρ, atol, rtol, maxdim)
         U = reshape(U', :, size(mps.tensors[i])[2], size(embed)[1])
         # ─p─┬─q─╮
         #    a   |
@@ -178,24 +261,30 @@ function compress!(::FullCompress, mps::LabeledMPS{T}; atol::RT=1e-12, maxdim::I
     return mps
 end
 
-function truncated_svd(M::AbstractMatrix, atol::Real, maxdim::Int)
-    @assert atol >= zero(atol) "Truncation tolerance must be nonnegative."
+function truncated_svd(M::AbstractMatrix, atol::Real, rtol::Real, maxdim::Int)
+    @assert atol >= zero(atol) "Absolute truncation tolerance must be nonnegative."
+    @assert rtol >= zero(rtol) "Relative truncation tolerance must be nonnegative."
     @assert maxdim > 0 "Truncated bond dimension must be positive."
 
     res = LinearAlgebra.svd(M)
-    r = min(searchsortedfirst(res.S, atol; rev=true) - 1, maxdim, length(res.S))
+    # Cutoff is the larger of absolute tolerance or relative tolerance * max singular value
+    cutoff = isempty(res.S) ? atol : max(atol, rtol * res.S[1])
+    r = min(searchsortedfirst(res.S, cutoff; rev=true) - 1, maxdim, length(res.S))
 
-    # Note: may have performance issue due to the copy
-    return res.U[:, 1:r], res.S[1:r], res.Vt[1:r, :], sum(res.S[(r + 1):end] .^ 2) # FIXME: why do such truncation?
+    # Slicing creates copies (necessary for reshape compatibility in callers)
+    return res.U[:, 1:r], res.S[1:r], res.Vt[1:r, :], sum(abs2, @view(res.S[(r + 1):end]))
 end
 
-function truncated_eigen(M::AbstractMatrix, atol::Real, maxdim::Int)
-    @assert atol >= zero(atol) "Truncation tolerance must be nonnegative."
+function truncated_eigen(M::AbstractMatrix, atol::Real, rtol::Real, maxdim::Int)
+    @assert atol >= zero(atol) "Absolute truncation tolerance must be nonnegative."
+    @assert rtol >= zero(rtol) "Relative truncation tolerance must be nonnegative."
     @assert maxdim > 0 "Truncated bond dimension must be positive."
 
     res = LinearAlgebra.eigen(M; sortby=x -> -x)
-    r = min(searchsortedfirst(res.values, atol; rev=true) - 1, maxdim, length(res.values))
+    # Cutoff is the larger of absolute tolerance or relative tolerance * max eigenvalue
+    cutoff = isempty(res.values) ? atol : max(atol, rtol * res.values[1])
+    r = min(searchsortedfirst(res.values, cutoff; rev=true) - 1, maxdim, length(res.values))
 
-    # Note: may have performance issue due to the copy
-    return res.values[1:r], res.vectors[:, 1:r], sum(res.values[(r + 1):end] .^ 2) # FIXME: why do such truncation?
+    # Slicing creates copies (necessary for reshape compatibility in callers)
+    return res.values[1:r], res.vectors[:, 1:r], sum(abs2, @view(res.values[(r + 1):end]))
 end

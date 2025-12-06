@@ -5,14 +5,28 @@ mutable struct LabeledMPS{T<:Number, AT<:AbstractArray{T,3}, LT}
     labels::Vector{LT}
     label_to_index::Dict{LT, Int}
     center::Int
-    function LabeledMPS(tensors::Vector{AT},labels::Vector{LT}) where {T<:Number, AT<:AbstractArray{T,3}, LT}
+    lognorm::Float64  # accumulated log-norm for numerical stability
+    function LabeledMPS(tensors::Vector{AT}, labels::Vector{LT}; center::Int=-1, lognorm::Float64=0.0) where {T<:Number, AT<:AbstractArray{T,3}, LT}
         @assert length(tensors) == length(labels) "LabeledMPS must have the same number of tensors and labels"
         @assert size(tensors[1], 1) == 1 "Left virtual bond must have dimension 1"
         @assert size(tensors[end], 3) == 1 "Right virtual bond must have dimension 1"
         label_to_index = Dict{LT, Int}(zip(labels, 1:length(labels)))
-        new{T, AT, LT}(tensors, labels, label_to_index, -1)
+        new{T, AT, LT}(tensors, labels, label_to_index, center, lognorm)
     end
 end
+
+# Deep copy for LabeledMPS
+function Base.copy(mps::LabeledMPS)
+    return LabeledMPS(
+        [copy(t) for t in mps.tensors],
+        copy(mps.labels);
+        center=mps.center,
+        lognorm=mps.lognorm
+    )
+end
+
+# Get the log-norm of the MPS
+lognorm(mps::LabeledMPS) = mps.lognorm
 
 nsite(mps::LabeledMPS) = length(mps.labels)
 num_of_elements(mps::LabeledMPS) = sum(length, mps.tensors)
@@ -181,6 +195,27 @@ function contract_mps(tensors::Vector{<:AbstractArray{T,3}}) where T
 end
 contract_mps(mps::LabeledMPS) = contract_mps(mps.tensors)
 
+"""
+    true_value(mps::LabeledMPS)
+
+Contract the MPS and scale by the accumulated norm factor.
+Returns `exp(lognorm) * contract_mps(mps)[]`.
+"""
+function true_value(mps::LabeledMPS)
+    return exp(mps.lognorm) * contract_mps(mps)[]
+end
+
+"""
+    log_true_value(mps::LabeledMPS)
+
+Returns the log of the absolute value of the contracted MPS with norm factor.
+Useful for very large/small values where exp(lognorm) would overflow/underflow.
+Returns `lognorm + log(abs(contract_mps(mps)[]))`.
+"""
+function log_true_value(mps::LabeledMPS)
+    return mps.lognorm + log(abs(contract_mps(mps)[]))
+end
+
 
 function contract_with_mps(optcode::DynamicNestedEinsum{LT}, tensors::Vector{<:AbstractArray{T}}, size_dict::Dict{LT, Int};maxdim = Inf) where {T<:Number, LT}
     mps, apply_vec, tensor_labels, vanish_labels_vec = code2mps(optcode, size_dict)
@@ -188,11 +223,11 @@ function contract_with_mps(optcode::DynamicNestedEinsum{LT}, tensors::Vector{<:A
     return mps.tensors
 end
 
-function random_mps(::Type{T}, N::Int; maxdim::Int, d::Int=2, amplitude::Real=1.0) where T
+function random_mps(::Type{T}, N::Int; maxdim::Int, d::Int=2, amplitude::Real=1.0, lognorm::Float64=0.0) where T
     @assert N > 0 "Number of sites must be positive, got: $N"
     @assert maxdim > 0 "Maximum bond dimension must be positive, got: $maxdim"
     @assert d > 0 "Physical dimension must be greater than 0, got: $d"
-    return LabeledMPS([T(amplitude) .* randn(T, min(d^(i-1), d^(N-i+1), maxdim), d, min(d^i, d^(N-i), maxdim)) for i in 1:N], [i for i in 1:N])
+    return LabeledMPS([T(amplitude) .* randn(T, min(d^(i-1), d^(N-i+1), maxdim), d, min(d^i, d^(N-i), maxdim)) for i in 1:N], [i for i in 1:N]; lognorm=lognorm)
 end
 
 function Base.vec(mps::LabeledMPS{T,AT,LT}) where {T,AT,LT<:Integer}
