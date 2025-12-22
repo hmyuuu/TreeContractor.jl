@@ -2,13 +2,13 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
-| T-034 | Low | Overview of Linear Rank-Width (MPS vs PEPS) | PhD-Theory | **[Completed]** | 4 | 10 | [Linear] |
-| T-035 | High | Implement Independent Set Solver (DP) | PhD-Algo | **[Completed]** | 8 | 15 | [MVP] |
-| T-036 | High | Create End-to-End Demo Script | PhD-Algo | **[Pending]** | 0 | 10 | [Demo] |
+| T-036 | High | Create End-to-End Demo Script | PhD-Algo | **[Completed]** | 6 | 10 | [Demo] |
+| T-037 | Medium | Documentation and Final Report | PhD-Theory | **[Pending]** | 0 | 10 | [Final] |
 
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-22 | T-036 | Completed | PhD-Algo | Created `research/demo/run_solver.jl`. Demonstrated end-to-end pipeline on random graph (n=15). Fixed DP cache collision bug in `ParseTrees.jl`. |
 | 2025-12-22 | T-035 | Completed | PhD-Algo | Implemented `DPSolver.jl` for MaxCut using GF(2) rank-decomposition. Verified on Bipartite graph (C4). Identified limitations for non-GF(2) structures (K3). |
 | 2025-12-22 | T-034 | Completed | PhD-Theory | Analyzed Linear Rank-Width. Confirmed connection to MPS (1D) vs General RW (TTN). Validated solver's generality. |
 | 2025-12-22 | T-031 | Completed | PhD-Algo | Implemented `ParseTrees.jl` to convert RankDecomposition to algebraic ParseTree for DP. Verified on P4. |
@@ -29,4 +29,15 @@
 | 2025-12-22 | T-019 | Completed | PhD-Theory | Updated Essence with Queyranne, Cost Analysis, and Parse Trees. |
 | 2025-12-22 | T-020 | Completed | PhD-Theory | Analyzed Hliněný's Parse Tree. Created `hlineny2006.md`. |
 | 2025-12-22 | T-018 | Completed | PhD-Theory | Theoretical analysis of RW vs Cost. Created `rank_width_vs_cost.md`. |
+| T-017 | High | Deep Dive: Fast FPT Algorithm (Korhonen 2024) | PhD-Algo | **[Completed]** | 00:30 | 01:00 | [Analyzed: Too complex for now] |
+| T-015 | High | Deep Dive: Hypergraph Partitioning & Rank-Width (Gray 2018) | PhD-Algo | **[Completed]** | 00:45 | 01:00 | [Context for T-013] |
+| T-014 | High | Deep Dive: Oum-Seymour Approximation Algorithm (Theory) | PhD-Theory | **[Completed]** | 00:30 | 01:00 | [Found Queyranne connection] |
+| T-012 | High | Validate Hypothesis H1 via Simulation (Linear vs Branching) | PhD-Physics | **[Completed]** | 00:30 | 02:00 | [Prev: T-011] |
+| T-011 | High | Formulate Research Questions and Hypothesis | PhD-Theory | **[Completed]** | 01:00 | 01:00 | [Prev: T-010] |
+| T-010 | High | Search Zotero for `rank-width` papers and synthesize theoretical essence | PhD-Theory | **[Completed]** | 00:45 | 01:00 | |
+| T-009 | Low | Implement Approximate Rank-Decomposition Algorithm | PhD-Algo | **[Completed]** | 00:45 | - | [Initial Heuristic] |
+| 2025-12-22 | T-008 | Completed | PhD-Physics | Benchmarked GF(2) vs SVD. Confirmed match for Graph States. |
+| 2025-12-22 | T-001 | Completed | PhD-Theory | Analysis of Oum 2006 |
+| 2025-12-22 | T-002 | Completed | PhD-Physics | Analysis of Markov 2008 |
+| 2025-12-22 | T-003 | Completed | PhD-Algo | Analysis of Gray 2018 |
 

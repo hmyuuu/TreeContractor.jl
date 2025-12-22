@@ -40,6 +40,21 @@ function build_parse_tree(rd::RankDecomposition)
     # Note: SubCubicTree is unrooted (conceptually), but stored as rooted.
     # The root of SubCubicTree represents the cut (V, {}), which has rank 0.
     
+    # n = size(rd.G, 1)
+
+    
+    # Root of SubCubicTree
+    # The SubCubicTree struct from RankWidthAlgorithms:
+    # left/right are Union{SubCubicTree, Int}.
+    
+    # We need to assign unique IDs to ParseNodes to avoid cache collisions in DP.
+    # The original IDs from SubCubicTree might not be unique or dense.
+    id_counter = 0
+    function next_id()
+        id_counter += 1
+        return id_counter
+    end
+
     n = size(rd.G, 1)
     
     function recurse(node::SubCubicTree)
@@ -47,14 +62,9 @@ function build_parse_tree(rd::RankDecomposition)
         function process_child(child)
             if child isa Int
                 # Leaf
-                # Cut is ({child}, V\{child})
-                # Basis: if row child is not zero, basis is {child}. Else empty.
-                # Actually, we need to compute the rank of the cut in G.
                 rank = cut_rank(rd.G, [child])
-                # We need to pick a basis. The row 'child' itself is the candidate.
-                # If rank is 1, then {child} is the basis index.
                 basis = (rank > 0) ? [child] : Int[]
-                return ParseNode(child, true, child, nothing, nothing, basis, rank)
+                return ParseNode(next_id(), true, child, nothing, nothing, basis, rank)
             else
                 # Internal node
                 return recurse(child)
@@ -79,27 +89,14 @@ function build_parse_tree(rd::RankDecomposition)
         rank = cut_rank(rd.G, leaves)
         
         # Compute actual basis indices for the cut (leaves, rest)
-        # We perform Gaussian elimination on G[leaves, rest] to find independent rows.
-        # The indices of these rows (subset of leaves) form the basis.
         basis = compute_basis(rd.G, leaves)
         
-        return ParseNode(node.id, false, 0, p_left, p_right, basis, rank)
+        return ParseNode(next_id(), false, 0, p_left, p_right, basis, rank)
     end
     
-    # Root of SubCubicTree
-    # The SubCubicTree struct from RankWidthAlgorithms:
-    # left/right are Union{SubCubicTree, Int}.
-    
     # We need to handle the case where the root itself is just a leaf (n=1)
-    # But RankDecomposition usually has a tree.
-    
     if rd.tree.left === nothing && rd.tree.right === nothing
-         # Single node tree?
-         # If n=1, rank_width returns SubCubicTree(1, nothing, nothing).
-         # Wait, logic in rank_width: "if n<=1 return ... SubCubicTree(1, nothing, nothing)"
-         # This represents a graph with 1 vertex?
-         # But usually a tree has at least leaves.
-         return ParseNode(1, true, 1, nothing, nothing, Int[], 0)
+         return ParseNode(next_id(), true, 1, nothing, nothing, Int[], 0)
     end
     
     return recurse(rd.tree)

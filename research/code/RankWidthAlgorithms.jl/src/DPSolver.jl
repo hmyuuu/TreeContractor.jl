@@ -79,6 +79,15 @@ function solve_max_cut(pt::ParseNode, G::AbstractMatrix)
             return dp
         else
             # Internal Node
+            # The ParseTree from ParseTrees.jl should have valid left/right children for internal nodes.
+            # But we must check if they are nothing?
+            # ParseNode struct: left::Union{ParseNode, Nothing}, right::Union{ParseNode, Nothing}
+            # If is_leaf is false, left and right SHOULD be ParseNode.
+            
+            if node.left === nothing || node.right === nothing
+                error("Internal node $(node.id) has missing children.")
+            end
+
             dp_left = recurse(node.left)
             dp_right = recurse(node.right)
             
@@ -87,6 +96,8 @@ function solve_max_cut(pt::ParseNode, G::AbstractMatrix)
             
             # Iterate all pairs of states from children
             for i_l in 0:(1<<k_l)-1
+                # Accessing dp_left[i_l+1] might be out of bounds if size doesn't match k_l?
+                # Ensure dp is size 1<<k. Yes, created above.
                 if dp_left[i_l+1] < 0; continue; end
                 
                 for i_r in 0:(1<<k_r)-1
