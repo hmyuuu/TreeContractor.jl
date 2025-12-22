@@ -2,7 +2,8 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
-| T-049 | High | Deep Dive: Beni et al. 2025 (Quantum Decoder) | PhD-Physics | **[Pending]** | 0 | 5 | [Beni 2025] |
+| T-050 | High | Deep Dive: Jiang et al. 2024 (Positive Bias Contraction) | PhD-Physics | **[Pending]** | 0 | 5 | [Jiang 2024] |
+| T-049 | High | Deep Dive: Beni et al. 2025 (Quantum Decoder) | PhD-Physics | **[Completed]** | 3 | 5 | [Beni 2025] |
 | T-048 | Medium | Deep Dive: Bergougnoux 2023 (Tight Lower Bounds) | PhD-Theory | **[Completed]** | 3 | 5 | [Bergougnoux 2023] |
 | T-047 | High | Deep Dive: Bonnet et al. 2021 (Twin-Width) | PhD-Theory | **[Completed]** | 3 | 5 | [Bonnet 2021] |
 | T-044 | Low | Implement SVD-based Cut Heuristic | PhD-Algo | **[Suspended]** | 0 | 5 | [Anand 2025] |
