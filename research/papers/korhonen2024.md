@@ -1,8 +1,8 @@
 # Almost-Linear Time Parameterized Algorithm for Rankwidth via Dynamic Rankwidth (Korhonen & Sokołowski, 2024)
 
 **Citation**: Korhonen, T., & Sokołowski, M. (2024). *Almost-linear time parameterized algorithm for rankwidth via dynamic rankwidth*. arXiv preprint arXiv:2402.12364.
-**Status**: [Analysis in Progress]
-**Tags**: #rank-width #algorithm #FPT #dynamic-graph
+**Status**: [Deep Research Completed]
+**Tags**: #rank-width #algorithm #FPT #dynamic-graph #prefix-rebuilding
 
 ## 1. Paper Overview
 **Core Result**: An algorithm that computes a rank-decomposition of width $k$ (or certifies rank-width $>k$) in time $O_k(n^{1+o(1)}) + O(m)$.
@@ -58,16 +58,29 @@ The 'Approximation' aspect ($4k$) is a trade-off. For exact physics simulation, 
 2.  **PhD-Algo**: Sketch a simplified 'Dynamic Rank-Width' interface. Can we do a naive $O(n^2)$ dynamic version first?
 3.  **PhD-Physics**: No immediate task, but keep the 'Gate-by-Gate' optimization idea in the backlog."
 
-### 3. Key Concepts Extracted
-*   **Dynamic Rank-Width**: Maintaining decomposition under edge insertions.
-*   **Twin Flipping**: A specific operation used to model edge changes?
-*   **CMSO1 Maintenance**: The ability to query logical properties instantly.
+### 3. Technical Deep Dive: Prefix Rebuilding
 
-### 4. Implementation Plan (Draft)
+**Context**: This technique is adapted from Dynamic Treewidth (Korhonen et al., FOCS 2023).
+
+**Mechanism**:
+1.  **Linearization**: The rank-decomposition tree is treated as a sequence of operations (Leaves and Joins) in a specific traversal order (e.g., Post-order). This sequence forms a "word" $W$.
+2.  **Algebraic View**: Each operation in $W$ transforms the boundary state (rank-width cut boundary). The width of the decomposition corresponds to the maximum "size" of the state during the evaluation of $W$.
+3.  **Edge Insertion**: Adding an edge $(u, v)$ modifies the "leaf" operations for $u$ and $v$ in $W$. This change propagates through the evaluation, potentially increasing the state size (width) for all intermediate steps.
+4.  **Rebuilding**:
+    *   Instead of recomputing the optimal $W$ from scratch, the algorithm identifies the **Prefix** of $W$ (or a segment) where the width constraint is violated.
+    *   It "rebuilds" this segment by searching for a new sequence of operations that implements the same logical graph part but with lower width.
+    *   This search is done efficiently using the **Rank Decomposition Automata**.
+
+**Relevance to Implementation**:
+*   For our $O(n^2)$ prototype, we implemented a simpler version: **Local Search Refinement**.
+*   Instead of "rebuilding a prefix", we simply "rotate" the tree locally to fix violations.
+*   The full "Prefix Rebuilding" is necessary only for sub-polynomial time. For $O(n^2)$, simple rebalancing is sufficient.
+
+## 4. Implementation Plan (Draft)
 1.  Define a `DynamicRankDecomposition` struct.
 2.  Implement `add_edge!(G, u, v)` that updates the decomposition.
 3.  Use the `Prefix Rebuilding` idea (simplified) to rebalance the tree.
 
 ## 5. References
-*   Korhonen, T., & Sokołowski, M. (2024).
+*   Korhonen, T., & Sokołowski, M. (2024). *Almost-linear time parameterized algorithm for rankwidth via dynamic rankwidth*.
 *   Fomin, F. V., & Korhonen, T. (2022).
