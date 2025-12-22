@@ -3,11 +3,13 @@
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
 | T-034 | Low | Overview of Linear Rank-Width (MPS vs PEPS) | PhD-Theory | **[Completed]** | 4 | 10 | [Linear] |
-| T-035 | High | Implement Independent Set Solver (DP) | PhD-Algo | **[Pending]** | 0 | 15 | [MVP] |
+| T-035 | High | Implement Independent Set Solver (DP) | PhD-Algo | **[Completed]** | 8 | 15 | [MVP] |
+| T-036 | High | Create End-to-End Demo Script | PhD-Algo | **[Pending]** | 0 | 10 | [Demo] |
 
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-22 | T-035 | Completed | PhD-Algo | Implemented `DPSolver.jl` for MaxCut using GF(2) rank-decomposition. Verified on Bipartite graph (C4). Identified limitations for non-GF(2) structures (K3). |
 | 2025-12-22 | T-034 | Completed | PhD-Theory | Analyzed Linear Rank-Width. Confirmed connection to MPS (1D) vs General RW (TTN). Validated solver's generality. |
 | 2025-12-22 | T-031 | Completed | PhD-Algo | Implemented `ParseTrees.jl` to convert RankDecomposition to algebraic ParseTree for DP. Verified on P4. |
 | 2025-12-22 | T-033 | Completed | PhD-Theory | Analyzed Bergougnoux (2023). Established ETH lower bound $2^{O(k^2)}$ for general graph problems. Quantum Sim remains $2^{O(k)}$. |

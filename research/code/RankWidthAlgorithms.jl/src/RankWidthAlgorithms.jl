@@ -5,7 +5,7 @@ using Random
 
 export RankDecomposition, SubCubicTree
 export rank_width, cut_rank
-export Queyranne, LocalSearch, ParseTrees
+export Queyranne, LocalSearch, ParseTrees, DPSolver
 
 """
     SubCubicTree
@@ -84,6 +84,7 @@ end
 include("Queyranne.jl")
 include("LocalSearch.jl")
 include("ParseTrees.jl")
+include("DPSolver.jl")
 
 """
     find_best_split(G, vertices)
