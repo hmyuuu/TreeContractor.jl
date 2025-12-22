@@ -5,7 +5,8 @@ using Random
 
 export RankDecomposition, SubCubicTree
 export rank_width, cut_rank
-export Queyranne, LocalSearch, ParseTrees, DPSolver
+export Queyranne, LocalSearch, ParseTrees, DPSolver, LinearRankWidth, DynamicRankWidth
+export solve_linear_rank_width, LinearRankDecomposition, DynamicGraph, add_edge!
 
 """
     SubCubicTree
@@ -85,6 +86,11 @@ include("Queyranne.jl")
 include("LocalSearch.jl")
 include("ParseTrees.jl")
 include("DPSolver.jl")
+include("LinearRankWidth.jl")
+include("DynamicRankWidth.jl")
+
+using .LinearRankWidth
+using .DynamicRankWidth
 
 """
     find_best_split(G, vertices)

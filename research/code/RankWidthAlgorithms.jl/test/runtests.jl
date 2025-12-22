@@ -11,6 +11,10 @@ using .RankWidthAlgorithms
     # Include the Queyranne tests
     include("test_queyranne.jl")
     include("test_localsearch.jl")
+    include("test_linear_rw.jl")
+    include("test_dynamic_rw.jl")
+    include("test_parsetrees.jl")
+    include("test_dpsolver.jl")
 
     @testset "Structures" begin
         # Create a simple tree: (1, 2) - (3, 4)

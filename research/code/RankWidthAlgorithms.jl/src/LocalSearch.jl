@@ -178,38 +178,53 @@ function refine_decomposition(G::AbstractMatrix, tree_root::SubCubicTree)
             # 2. (A, Y) - swap B and Y
             # 3. (B, Y) - swap A and Y
             
-            # We evaluate the max rank of the 3 edges incident to the new central node?
-            # Actually, local search typically minimizes the rank of the *central* edge P-C.
-            # But we must ensure we don't increase rank of P-Y or C-A or C-B too much.
+            # We evaluate the 3 configurations based on the MAX rank of the affected edges.
+            # The edges involved in the rotation are:
+            # 1. The Central Edge (P-C).
+            # 2. The edge to the Sibling (P-Y).
+            # 3. The edge to the Left Child (C-A).
+            # 4. The edge to the Right Child (C-B).
             
-            # Let's calculate the cut ranks for the 3 permutations.
+            # Note: The rank of the edge connecting to a subtree X is simply rank(Leaves(X)).
+            # This rank is intrinsic to X and does not change when X is moved, 
+            # BUT the set of edges in the tree changes.
+            # E.g. In Config 1, we have an edge with rank(Y). In Config 2, we have an edge with rank(A).
+            # We want to minimize the local MAXIMUM rank.
+            
             leaves_A = get_leaves(A)
             leaves_B = get_leaves(B)
             leaves_Y = get_leaves(Y)
             
-            # The "Rest" is everything else.
-            # Rank(S) = Rank(V \ S).
+            r_A = cut_rank(G, leaves_A)
+            r_B = cut_rank(G, leaves_B)
+            r_Y = cut_rank(G, leaves_Y)
             
-            rank_1 = cut_rank(G, vcat(leaves_A, leaves_B)) # Current P-C edge
-            rank_2 = cut_rank(G, vcat(leaves_A, leaves_Y)) # Swap B, Y
-            rank_3 = cut_rank(G, vcat(leaves_B, leaves_Y)) # Swap A, Y
+            # Central Cut Ranks
+            r_AB = cut_rank(G, vcat(leaves_A, leaves_B)) # Config 1 (Current)
+            r_AY = cut_rank(G, vcat(leaves_A, leaves_Y)) # Config 2 (Swap B, Y) -> Central is A+Y
+            r_BY = cut_rank(G, vcat(leaves_B, leaves_Y)) # Config 3 (Swap A, Y) -> Central is B+Y
             
-            # We take the best configuration
-            best_r = min(rank_1, rank_2, rank_3)
+            # Max Local Ranks
+            # 1. Current: Central=AB, Sibling=Y, Left=A, Right=B
+            max_1 = max(r_AB, r_Y, r_A, r_B)
             
-            if best_r < rank_1
-                # We found an improvement for this specific cut!
-                # Apply the swap.
-                # println("Improving edge rank from $rank_1 to $best_r")
-                
-                if rank_2 == best_r
+            # 2. Swap B, Y: Central=AY, Sibling=B, Left=A, Right=Y
+            max_2 = max(r_AY, r_B, r_A, r_Y)
+            
+            # 3. Swap A, Y: Central=BY, Sibling=A, Left=Y, Right=B
+            max_3 = max(r_BY, r_A, r_Y, r_B)
+            
+            best_max = min(max_1, max_2, max_3)
+            
+            # We move if we strictly improve the local max, OR if we break ties by improving the central cut.
+            # Breaking ties is crucial to escape plateaus (e.g., P4 test case).
+            
+            current_central = r_AB
+            
+            if best_max < max_1
+                # Strictly better max rank
+                if max_2 == best_max
                     # Swap B and Y
-                    # P connects to C, B (now sibling is B)
-                    # C connects to A, Y
-                    
-                    # Update pointers
-                    # P.child is still C
-                    # P.sibling (other child) becomes B
                     if is_left_child
                         parent.right = B
                         B.parent = parent
@@ -217,18 +232,12 @@ function refine_decomposition(G::AbstractMatrix, tree_root::SubCubicTree)
                         parent.left = B
                         B.parent = parent
                     end
-                    
-                    # C.right (was B) becomes Y
                     child.right = Y
                     Y.parent = child
-                    
                     improved = true
-                    break # Restart search
-                elseif rank_3 == best_r
+                    break
+                elseif max_3 == best_max
                     # Swap A and Y
-                    # P connects to C, A (now sibling is A)
-                    # C connects to B, Y
-                    
                     if is_left_child
                         parent.right = A
                         A.parent = parent
@@ -236,12 +245,42 @@ function refine_decomposition(G::AbstractMatrix, tree_root::SubCubicTree)
                         parent.left = A
                         A.parent = parent
                     end
-                    
                     child.left = Y
                     Y.parent = child
-                    
                     improved = true
-                    break # Restart search
+                    break
+                end
+            elseif best_max == max_1
+                # Same max rank, check if central cut improves
+                # Config 2 Central: r_AY
+                # Config 3 Central: r_BY
+                
+                if max_2 == best_max && r_AY < current_central
+                     # Swap B and Y
+                    if is_left_child
+                        parent.right = B
+                        B.parent = parent
+                    else
+                        parent.left = B
+                        B.parent = parent
+                    end
+                    child.right = Y
+                    Y.parent = child
+                    improved = true
+                    break
+                elseif max_3 == best_max && r_BY < current_central
+                    # Swap A and Y
+                    if is_left_child
+                        parent.right = A
+                        A.parent = parent
+                    else
+                        parent.left = A
+                        A.parent = parent
+                    end
+                    child.left = Y
+                    Y.parent = child
+                    improved = true
+                    break
                 end
             end
         end

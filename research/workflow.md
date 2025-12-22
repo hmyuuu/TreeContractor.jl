@@ -46,6 +46,27 @@ The workflow operates in a continuous loop managed by the PI Agent.
         - If Zotero MCP is unavailable or returns errors, log it and fallback to `WebSearch`.
 - **Output:** A list of references to be used in Step 2.
 
+### Step 0.5: Group Meeting Protocol (Paper Analysis)
+**Trigger:** When a specific paper needs deep research (e.g., from the Literature Review).
+
+This protocol simulates a multi-agent academic reading group to extract maximum value from key papers.
+
+1.  **Preparation (Fetcher Agent)**:
+    *   **Action**: Fetch the full text or detailed abstract/metadata of the target paper.
+    *   **Tool**: `mcp_zotero`, `WebSearch`, or `Read` (if local).
+    *   **Output**: A raw text summary or full content file in `research/papers/[AuthorYear].md`.
+
+2.  **Analysis Round (PhD Agents)**:
+    *   **PhD-Theory**: Asks: "What is the core theorem? How does this change our graph structural understanding? Are there new obstructions?"
+    *   **PhD-Algo**: Asks: "What is the complexity? What data structures are needed? Is it practical or purely galactic?"
+    *   **PhD-Physics**: Asks: "Does this relate to tensor network contraction? Is there a quantum equivalent?"
+    *   **Action**: Each agent generates specific *Questions* and *Insights* based on the raw text.
+
+3.  **Synthesis (PI Agent)**:
+    *   **Review**: The PI evaluates the agents' outputs.
+    *   **Assignment**: The PI creates specific sub-tasks based on the insights (e.g., "PhD-Algo: Implement the dynamic data structure from Section 4").
+    *   **Documentation**: The PI updates `research/papers/[AuthorYear].md` with a "Group Meeting Minutes" section containing the dialogue and final decisions.
+
 ### Step 1: Task Assignment & Reference Check
 The PI Agent assigns a task from the Active Queue to a specific PhD Agent.
 - **Reference Check:** The Agent MUST check the `# References` section of the task description or related documents.
