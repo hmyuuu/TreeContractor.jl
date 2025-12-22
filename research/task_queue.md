@@ -2,7 +2,8 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
-| T-013 | High | Implement Local Search Refinement for Rank-Decomposition | PhD-Algo | **[Completed]** | 8 | 10 | [Verified] |
+| T-032 | High | Research "Breaking the Treewidth Barrier" (Cheng 2025) & Tensor Networks | PhD-Physics | **[Completed]** | 4 | 10 | [Quantum] |
+| T-033 | Medium | Research "Tight Lower Bounds" (Bergougnoux 2023) | PhD-Theory | **[Pending]** | 0 | 10 | [Limits] |
 | T-031 | Medium | Implement Parse Tree Construction | PhD-Algo | **[Pending]** | 0 | 10 | [Next Step] |
 | T-016 | High | Implement Queyranne's Algorithm for Min-Rank Cut | PhD-Algo | **[Completed]** | 12 | 15 | [T-024 Verified] |
 | T-024 | High | Validate Implementation Plan for Queyranne Solver | PhD-Algo | **[Completed]** | 5 | 10 | [Pre-Implementation] |
@@ -10,6 +11,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-22 | T-032 | Completed | PhD-Physics | Analyzed Cheng et al. (2025). Confirmed "Linear Rank-Width" beats Treewidth for Quantum Sim. Our General Rank-Width is theoretically superior. |
 | 2025-12-22 | T-013 | Completed | PhD-Algo | Implemented `LocalSearch.jl` with 3-way split optimization. Verified width reduction on P4 test case (2->1). Integrated into `rank_width()`. |
 | 2025-12-22 | T-030 | Completed | PhD-Theory | Analyzed Boolean-width. Confirmed Rank-Width is better for V1 (computability). |
 | 2025-12-22 | T-029 | Completed | PhD-Theory | Analyzed Courcelle 2000. Established MSO1 tractability ($O(n)$) for bounded rank-width. |
