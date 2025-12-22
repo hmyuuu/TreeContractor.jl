@@ -31,7 +31,8 @@ We distinguish between two types of problems solvable on Rank-Decompositions (Be
 | **Combinatorial** | $2^{\Theta(k^2)} \cdot n^{O(1)}$ | **Independent Set**, Dominating Set, MaxCut | State is a subset. Information is "complex" ($2^{k^2}$ subspaces). |
 
 *   **Note**: Our solver is optimized for the Algebraic case (Quantum Sim), but supports Combinatorial problems within the theoretical limits.
-*   **ETH Limit**: The $2^{\Theta(k^2)}$ bound is tight under the Exponential Time Hypothesis. Do not expect single-exponential performance for generic NP-hard problems.
+*   **ETH Limit**: The $2^{\Theta(k^2)}$ bound is tight under the Exponential Time Hypothesis.
+*   **Exception (Positive Bias)**: If the tensor network has non-negative entries with positive bias, approximate contraction is possible in quasi-polynomial time $n^{O(\log n)}$, even for high rank-width (Jiang et al., 2024).
 
 ## 🛠️ Usage
 
