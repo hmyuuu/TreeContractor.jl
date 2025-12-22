@@ -5,7 +5,7 @@ using Random
 
 export RankDecomposition, SubCubicTree
 export rank_width, cut_rank
-export Queyranne, LocalSearch
+export Queyranne, LocalSearch, ParseTrees
 
 """
     SubCubicTree
@@ -83,6 +83,7 @@ end
 # Include submodules AFTER types are defined
 include("Queyranne.jl")
 include("LocalSearch.jl")
+include("ParseTrees.jl")
 
 """
     find_best_split(G, vertices)
