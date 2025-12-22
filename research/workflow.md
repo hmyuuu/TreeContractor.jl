@@ -18,7 +18,7 @@ The purpose of this workflow is to guide the autonomous research and development
 ### PhD Agents
 - **PhD-Theory:** Specializes in Graph Theory, Proofs, and Logic (e.g., Oum, Courcelle).
 - **PhD-Algo:** Specializes in Algorithms, Complexity, and Implementation (e.g., Julia, KaHyPar).
-    - *Constraint:* For implementation tasks, only produce stubs/plans and mark as `[Paused]`.
+    - *Constraint:* **NO CODING IMMEDIATELY.** Focus on paper analysis and theoretical foundations first. Only implementation plans or stubs are allowed until theory is verified.
 - **PhD-Physics:** Specializes in Quantum Mechanics, Tensor Networks, and SVD (e.g., Markov, Shi).
 - **The Writer (Specialist):** Dedicated documentation and visualization agent.
     - **Role:** Research Documentation Manager, Task Logger, and Visualizer.
@@ -46,11 +46,11 @@ The workflow operates in a continuous loop managed by the PI Agent.
         - If Zotero MCP is unavailable or returns errors, log it and fallback to `WebSearch`.
 - **Output:** A list of references to be used in Step 2.
 
-### Step 1: Task Assignment
-The PI Agent evaluates the current state and creates a task in `research/task_queue.md`.
-- **Command:** Update `research/task_queue.md`.
-- **Input:** Current research goals from `research/research_plan.md` and **Search Results from Step 0**.
-- **Output:** A new row in the "Active Queue" table.
+### Step 1: Task Assignment & Reference Check
+The PI Agent assigns a task from the Active Queue to a specific PhD Agent.
+- **Reference Check:** The Agent MUST check the `# References` section of the task description or related documents.
+- **Paper Research:** If new papers are referenced, create separate tasks to research them *one by one* before proceeding with the main task.
+- **Mode:** `Plan Mode` is enforced for high-priority tasks.
 
 ### Step 2: Execution (PhD Agent)
 The assigned PhD Agent picks up the task.

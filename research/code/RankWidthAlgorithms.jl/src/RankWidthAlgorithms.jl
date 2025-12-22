@@ -3,12 +3,9 @@ module RankWidthAlgorithms
 using LinearAlgebra
 using Random
 
-# Include submodules
-include("Queyranne.jl")
-
 export RankDecomposition, SubCubicTree
 export rank_width, cut_rank
-export Queyranne
+export Queyranne, LocalSearch
 
 """
     SubCubicTree
@@ -74,8 +71,18 @@ function cut_rank(G::AbstractMatrix, A::Vector{Int})
         end
         pivot_row += 1
     end
+    # println("Rank of set $A: $(pivot_row - 1)")
+    # if A == [1, 3] || A == [3, 1]
+    #      println("Debug Rank {1,3}. Matrix:")
+    #      display(submatrix)
+    #      println("Rank: $(pivot_row-1)")
+    # end
     return pivot_row - 1
 end
+
+# Include submodules AFTER types are defined
+include("Queyranne.jl")
+include("LocalSearch.jl")
 
 """
     find_best_split(G, vertices)
