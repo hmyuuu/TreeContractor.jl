@@ -21,6 +21,18 @@ This repository contains the research and implementation of a high-performance *
 *   `reports/`: Research reports (including `final_report.typ`).
 *   `demo/`: Usage examples.
 
+## 📊 Complexity Landscape
+
+We distinguish between two types of problems solvable on Rank-Decompositions (Bergougnoux et al., 2023):
+
+| Problem Type | Complexity | Example | Reason |
+| :--- | :--- | :--- | :--- |
+| **Algebraic** | $2^{O(k)} \cdot n^{O(1)}$ | **Quantum Simulation**, XOR-SAT, Linear Algebra | State is a vector/subspace. Information is "linear". |
+| **Combinatorial** | $2^{\Theta(k^2)} \cdot n^{O(1)}$ | **Independent Set**, Dominating Set, MaxCut | State is a subset. Information is "complex" ($2^{k^2}$ subspaces). |
+
+*   **Note**: Our solver is optimized for the Algebraic case (Quantum Sim), but supports Combinatorial problems within the theoretical limits.
+*   **ETH Limit**: The $2^{\Theta(k^2)}$ bound is tight under the Exponential Time Hypothesis. Do not expect single-exponential performance for generic NP-hard problems.
+
 ## 🛠️ Usage
 
 ### 1. Installation
