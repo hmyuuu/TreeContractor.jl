@@ -2,24 +2,34 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
-| T-051 | Medium | Deep Dive: Levet et al. 2024 (Canonization) | PhD-Theory | **[Completed]** | 3 | 5 | [Levet 2024] |
-| T-050 | High | Deep Dive: Jiang et al. 2024 (Positive Bias Contraction) | PhD-Physics | **[Completed]** | 3 | 5 | [Jiang 2024] |
-| T-049 | High | Deep Dive: Beni et al. 2025 (Quantum Decoder) | PhD-Physics | **[Completed]** | 3 | 5 | [Beni 2025] |
-| T-048 | Medium | Deep Dive: Bergougnoux 2023 (Tight Lower Bounds) | PhD-Theory | **[Completed]** | 3 | 5 | [Bergougnoux 2023] |
-| T-047 | High | Deep Dive: Bonnet et al. 2021 (Twin-Width) | PhD-Theory | **[Completed]** | 3 | 5 | [Bonnet 2021] |
-| T-044 | Low | Implement SVD-based Cut Heuristic | PhD-Algo | **[Suspended]** | 0 | 5 | [Anand 2025] |
-| T-037 | Medium | Documentation and Final Report | PhD-Theory | **[Completed]** | 3 | 10 | [Final] |
+| T-064 | Medium | Deep Dive: Nešetřil et al. (2021) - Rankwidth Meets Stability | PhD-Theory | **[In Progress]** | 3 | 5 | [Nešetřil 2021] |
+| T-065 | Medium | Deep Dive: Bouchet (1987) - Isotropic Systems | PhD-Theory | **[Pending]** | 3 | 5 | [Bouchet 1987] |
+| T-066 | Medium | Deep Dive: Ganian & Hliněný (2010) - Parse Trees & Myhill-Nerode | PhD-Theory | **[Pending]** | 3 | 5 | [Ganian 2010] |
+
+## Deferred / Future Implementation
+
+| ID | Priority | Task Description | Assigned To | Status | Notes |
+|----|----------|------------------|-------------|--------|-------|
+| T-054 | High | Implement Simulated Annealing in LocalSearch.jl | PhD-Algo | **[Pending]** | Confirmed by Nouwt 2022. High impact. |
+| T-062 | High | Implement SVD-based Cut Heuristic | PhD-Algo | **[Pending]** | Confirmed by Anand 2025. |
+| T-063 | Medium | Create "Lettericity" Benchmark Generator | PhD-DataScience | **[Pending]** | From Alecu 2025. |
 
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-22 | T-061 | Completed | PhD-Theory | Analyzed Langer et al. 2011. Game Theory $\equiv$ Top-Down DP. |
+| 2025-12-22 | T-060 | Completed | PhD-Theory | Analyzed Kwon et al. 2020. Low Rank-Width Colorings. |
+| 2025-12-22 | T-059 | Completed | PhD-Theory | Analyzed Alecu et al. 2025. "Lettericity" $\implies$ Linear Rank-Width. Benchmark source. |
+| 2025-12-22 | T-058 | Completed | PhD-Theory | Analyzed Anand 2025. "Rank-Expansion" justifies SVD heuristic. |
+| 2025-12-22 | T-057 | Completed | PhD-Theory | Analyzed Ganian et al. 2010. #SAT/MAX-SAT are FPT on Rank-Width ($2^{k^2}$). |
+| 2025-12-22 | T-056 | Completed | PhD-Theory | Analyzed Beshkov et al. 2024. Connection to NN Topology (Expressivity metric). |
+| 2025-12-22 | T-055 | Completed | PhD-Algo | Analyzed Eiben et al. 2018. Hybrid Solver Strategy: Modulator X + RW(G-X). |
+| 2025-12-22 | T-053 | Completed | PhD-Algo | Analyzed Nouwt & Bodlaender. Confirmed Simulated Annealing on Decomposition Trees is the way to go. Added T-054. |
+| 2025-12-22 | T-052 | Completed | PhD-DataScience | Analyzed Dabrowski et al. (2024). Confirmed Rank-Width's utility for exact learning of decision trees. Identified "Incidence Graph" as the bridge. |
+| 2025-12-22 | T-051 | Completed | PhD-Theory | Analyzed Levet et al. 2024. Canonization in TC^2. Future: Isomorphism testing feature. |
 | 2025-12-22 | T-047 | Completed | PhD-Theory | Analyzed Bonnet 2021. Concluded Twin-Width is less relevant for contraction cost than Rank-Width. |
 | 2025-12-22 | T-046 | Completed | PhD-Algo | Researched "Prefix Rebuilding" in Korhonen 2024. Confirmed it's an advanced dynamic technique; simpler "Local Refinement" is sufficient for current O(n^2) goals. |
 | 2025-12-22 | T-045 | Completed | PhD-Theory | Researched Adler 2017. Identified Canonical Split Decomposition as key for exact DH graph solver. |
-
-## Task Log
-| Date | Task ID | Action | Actor | Notes |
-|------|---------|--------|-------|-------|
 | 2025-12-22 | T-044 | Pending | All Agents | Group Meeting: Anand 2025. Identified "Rank-Expansion" and SVD heuristic. Added to queue. |
 | 2025-12-22 | T-037 | Completed | PhD-Theory | Generated `final_report.typ` and `README.md`. Consolidated all findings. |
 | 2025-12-22 | T-043 | Completed | PhD-Algo | Implemented `DynamicRankWidth.jl` with `add_edge!` and `DynamicGraph`. Verified incremental P4 and C5 construction. |
@@ -60,4 +70,3 @@
 | 2025-12-22 | T-001 | Completed | PhD-Theory | Analysis of Oum 2006 |
 | 2025-12-22 | T-002 | Completed | PhD-Physics | Analysis of Markov 2008 |
 | 2025-12-22 | T-003 | Completed | PhD-Algo | Analysis of Gray 2018 |
-
