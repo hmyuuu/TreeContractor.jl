@@ -1,9 +1,16 @@
 using Test
 using LinearAlgebra
-include("../src/RankWidthAlgorithms.jl")
+
+# Directly include the source files if not running as a package
+if !isdefined(Main, :RankWidthAlgorithms)
+    include("../src/RankWidthAlgorithms.jl")
+end
 using .RankWidthAlgorithms
 
 @testset "RankWidthAlgorithms.jl" begin
+    # Include the Queyranne tests
+    include("test_queyranne.jl")
+
     @testset "Structures" begin
         # Create a simple tree: (1, 2) - (3, 4)
         t_left = SubCubicTree(1, 1, 2)

@@ -3,8 +3,12 @@ module RankWidthAlgorithms
 using LinearAlgebra
 using Random
 
+# Include submodules
+include("Queyranne.jl")
+
 export RankDecomposition, SubCubicTree
 export rank_width, cut_rank
+export Queyranne
 
 """
     SubCubicTree
