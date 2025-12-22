@@ -3,7 +3,7 @@
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
 | T-032 | High | Research "Breaking the Treewidth Barrier" (Cheng 2025) & Tensor Networks | PhD-Physics | **[Completed]** | 4 | 10 | [Quantum] |
-| T-033 | Medium | Research "Tight Lower Bounds" (Bergougnoux 2023) | PhD-Theory | **[Pending]** | 0 | 10 | [Limits] |
+| T-033 | Medium | Research "Tight Lower Bounds" (Bergougnoux 2023) | PhD-Theory | **[Completed]** | 4 | 10 | [Limits] |
 | T-031 | Medium | Implement Parse Tree Construction | PhD-Algo | **[Pending]** | 0 | 10 | [Next Step] |
 | T-016 | High | Implement Queyranne's Algorithm for Min-Rank Cut | PhD-Algo | **[Completed]** | 12 | 15 | [T-024 Verified] |
 | T-024 | High | Validate Implementation Plan for Queyranne Solver | PhD-Algo | **[Completed]** | 5 | 10 | [Pre-Implementation] |
@@ -11,6 +11,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-22 | T-033 | Completed | PhD-Theory | Analyzed Bergougnoux (2023). Established ETH lower bound $2^{O(k^2)}$ for general graph problems. Quantum Sim remains $2^{O(k)}$. |
 | 2025-12-22 | T-032 | Completed | PhD-Physics | Analyzed Cheng et al. (2025). Confirmed "Linear Rank-Width" beats Treewidth for Quantum Sim. Our General Rank-Width is theoretically superior. |
 | 2025-12-22 | T-013 | Completed | PhD-Algo | Implemented `LocalSearch.jl` with 3-way split optimization. Verified width reduction on P4 test case (2->1). Integrated into `rank_width()`. |
 | 2025-12-22 | T-030 | Completed | PhD-Theory | Analyzed Boolean-width. Confirmed Rank-Width is better for V1 (computability). |
