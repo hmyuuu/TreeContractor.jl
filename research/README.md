@@ -33,6 +33,7 @@ We distinguish between two types of problems solvable on Rank-Decompositions (Be
 *   **Note**: Our solver is optimized for the Algebraic case (Quantum Sim), but supports Combinatorial problems within the theoretical limits.
 *   **ETH Limit**: The $2^{\Theta(k^2)}$ bound is tight under the Exponential Time Hypothesis.
 *   **Exception (Positive Bias)**: If the tensor network has non-negative entries with positive bias, approximate contraction is possible in quasi-polynomial time $n^{O(\log n)}$, even for high rank-width (Jiang et al., 2024).
+*   **Canonization**: Graph Isomorphism for rank-width $k$ is in $TC^2$ (Levet et al., 2024). This allows efficient caching of sub-results by canonical labeling.
 
 ## 🛠️ Usage
 

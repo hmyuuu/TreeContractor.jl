@@ -2,6 +2,7 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
+| T-051 | Medium | Deep Dive: Levet et al. 2024 (Canonization) | PhD-Theory | **[Completed]** | 3 | 5 | [Levet 2024] |
 | T-050 | High | Deep Dive: Jiang et al. 2024 (Positive Bias Contraction) | PhD-Physics | **[Completed]** | 3 | 5 | [Jiang 2024] |
 | T-049 | High | Deep Dive: Beni et al. 2025 (Quantum Decoder) | PhD-Physics | **[Completed]** | 3 | 5 | [Beni 2025] |
 | T-048 | Medium | Deep Dive: Bergougnoux 2023 (Tight Lower Bounds) | PhD-Theory | **[Completed]** | 3 | 5 | [Bergougnoux 2023] |
