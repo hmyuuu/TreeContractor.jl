@@ -140,12 +140,12 @@ function build_tree_recursive(G::AbstractMatrix, vertices::Vector{Int}, id_count
 end
 
 """
-    rank_width(G::AbstractMatrix)
+    rank_width(G::AbstractMatrix; refine::Bool=true)
 
 Approximates the rank-width of graph G using a recursive randomized heuristic.
 Returns a RankDecomposition object.
 """
-function rank_width(G::AbstractMatrix)
+function rank_width(G::AbstractMatrix; refine::Bool=true)
     n = size(G, 1)
     if n <= 1
         return RankDecomposition(G, SubCubicTree(1, nothing, nothing), 0)
@@ -190,7 +190,13 @@ function rank_width(G::AbstractMatrix)
     
     max_w = compute_width_recursive(tree)
     
-    return RankDecomposition(G, tree, max_w)
+    rd = RankDecomposition(G, tree, max_w)
+    
+    if refine
+        rd = LocalSearch.refine_decomposition(G, rd.tree)
+    end
+    
+    return rd
 end
 
 end # module
