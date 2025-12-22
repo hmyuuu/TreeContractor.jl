@@ -31,7 +31,8 @@ Pkg.activate("code/RankWidthAlgorithms.jl")
 using RankWidthAlgorithms
 ```
 
-### 2. Computing Rank-Width
+### 2. Computing Rank-Width (TTNS Optimizer)
+This corresponds to optimizing the **Tree Tensor Network State (TTNS)** geometry (Ye & Lim, 2019).
 ```julia
 using LinearAlgebra
 # Create a random graph
@@ -45,7 +46,9 @@ rd = rank_width(adj)
 println("Rank-Width: $(rd.width)")
 ```
 
-### 3. Linear Rank-Width (Quantum Sim)
+### 3. Linear Rank-Width (MPS Optimizer)
+This corresponds to optimizing the **Matrix Product State (MPS)** or **Tensor Train (TT)** geometry.
+Essential for Quantum Circuit Simulation (Cheng et al., 2025).
 ```julia
 using RankWidthAlgorithms.LinearRankWidth
 
