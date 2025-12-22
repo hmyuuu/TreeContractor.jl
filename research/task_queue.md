@@ -2,9 +2,9 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
-| T-023 | High | Setup "The Writer" Agent & Documentation Pipeline | The Writer | **[Completed]** | 3 | 10 | [Infrastructure] |
-| T-022 | High | Investigate Weighted Rank-Width for Mixed States | PhD-Theory | **[Pending]** | 0 | 15 | [Optimization] |
-| T-021 | High | Formalize Local Search Moves for Rank-Decomposition | PhD-Theory | **[Completed]** | 6 | 10 | [Refining T-013] |
+| T-022 | High | Investigate Weighted Rank-Width for Mixed States | PhD-Theory | **[Review]** | 6 | 15 | [Optimization] |
+
+## Long-Term Implementation (Paused)
 
 ## Long-Term Implementation (Paused)
 
@@ -16,6 +16,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-22 | T-022 | Review | PhD-Theory | Confirmed Weighted Rank is submodular. Can use Queyranne. |
 | 2025-12-22 | T-023 | Completed | The Writer | Initialized reports directory and Typst templates. |
 | 2025-12-22 | T-021 | Completed | PhD-Theory | Formalized "Tree Rotation" as the Local Search move. Analyzed Beyß 2013. |
 | 2025-12-22 | T-019 | Completed | PhD-Theory | Updated Essence with Queyranne, Cost Analysis, and Parse Trees. |

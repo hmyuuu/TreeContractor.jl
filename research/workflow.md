@@ -86,7 +86,7 @@ The PhD Agent updates the task status in `research/task_queue.md`.
 - **The Writer Trigger:** Upon completion, "The Writer" agent must:
     1.  Generate a `.typ` report for the task in `research/reports/`.
     2.  Update the version history of modified core files.
-    3.  Commit changes to Git (simulated or actual).
+    3.  **Commit:** Perform a Git commit with a standardized message (e.g., `feat(theory): complete T-XXX [Title]`).
 
 ### Step 4: PI Evaluation
 The PI Agent reviews the output.
