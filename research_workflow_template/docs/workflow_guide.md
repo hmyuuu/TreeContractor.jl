@@ -1,53 +1,75 @@
-# Research Workflow Guide
+# Research Workflow Guide (Agent-Based)
 
 ## 1. Purpose
-This guide establishes a standardized protocol for conducting research, ensuring a clear separation between theoretical analysis and practical implementation. It is designed to facilitate collaboration and reproducibility.
+This workflow coordinates autonomous agents (PI, PhDs, Writer) to conduct rigorous research. It enforces a "Theory-First" policy, ensuring that all code is based on verified theoretical foundations.
 
-## 2. Roles & Responsibilities
+## 2. Agent Roles & Responsibilities
 
-### Researcher (Theory & Analysis)
-- **Focus**: Literature review, proof verification, and theoretical modeling.
-- **Output**: Markdown files in `/papers` and `/docs`.
-- **Key Rule**: Verify theoretical foundations *before* requesting implementation.
+### Principal Investigator (PI) Agent
+- **Role**: Manager, Coordinator, Quality Assurance.
+- **Responsibilities**:
+    - Assigns tasks via `task_queue.md`.
+    - Manages the **Escalation Protocol**.
+    - **Enforce Theory-First Policy**: Ensure no active coding tasks are executed without a theoretical plan.
 
-### Implementer (Code & Simulation)
-- **Focus**: Algorithm design, coding, testing, and benchmarking.
-- **Output**: Source code in `/code` and results in `/data`.
-- **Key Rule**: Do not start coding until the theoretical specification is clear and documented.
+### PhD Agents
+- **PhD-Theory**: Specializes in Proofs, Logic, and Literature Analysis.
+- **PhD-Algo**: Specializes in Complexity, Data Structures, and Implementation.
+    - *Constraint*: **NO CODING IMMEDIATELY.** Focus on paper analysis first.
+- **PhD-Physics**: Specializes in Domain Applications (e.g., Quantum, Physics).
+- **The Writer**: Documentation and Reporting.
+    - **Role**: Generates `.typ` reports and maintains version control.
 
-### Coordinator (Project Management)
-- **Focus**: Task assignment, deadline management, and quality assurance.
-- **Output**: Updates to `README.md` and task logs.
+## 3. Workflow Process (The Execution Loop)
 
-## 3. Workflow Process
+### Step 0: Conditional Literature Search (Zotero First)
+**Trigger**: When a task involves researching new topics.
+1.  **Check Local Library**: Use Zotero tools first.
+2.  **External Search**: Use WebSearch only if local is insufficient.
+3.  **Log**: Record findings in `search_logs/[YYYY-MM-DD]_search_log.md`.
 
-### Step 1: Literature Search (Zotero First)
-Before starting new research, follow this search protocol:
-1.  **Check Local Library**: Use Zotero or local references first.
-2.  **External Search**: Use web search only if local resources are insufficient.
-3.  **Log Results**: Record search queries and findings in a search log (e.g., in `/docs`).
+### Step 0.5: Group Meeting Protocol (Paper Analysis)
+**Trigger**: Deep research of a key paper.
+1.  **Fetch**: Retrieve full text/abstract into `papers/`.
+2.  **Analyze (Round Table)**:
+    - **Theory**: Core theorems?
+    - **Algo**: Complexity?
+    - **Physics**: Application?
+3.  **Synthesize**: PI creates sub-tasks based on insights.
 
-### Step 2: Paper Analysis
-When analyzing a key paper:
-1.  **Create an Analysis File**: Create `papers/[AuthorYear].md`.
-2.  **Summarize**: Extract the core theorem or contribution.
-3.  **Identify Implications**:
-    - **Theoretical**: New proofs, obstructions, or definitions.
-    - **Algorithmic**: Complexity classes, data structures needed.
-4.  **Synthesize**: Determine actionable next steps (e.g., "Implement Algorithm A").
+### Step 1: Task Assignment
+The PI assigns a task from `task_queue.md`.
+- **Mode**: `Plan Mode` is enforced for high-priority tasks.
+- **Reference Check**: Ensure all dependencies are met.
 
-### Step 3: Implementation Handover
-1.  **Specification**: The Researcher writes a clear spec in the paper analysis file.
-2.  **Stubbing**: The Implementer creates a placeholder file in `/code` with `NotImplemented` errors.
-3.  **Development**: Code is written, tested, and benchmarked.
-4.  **Verification**: Results are compared against theoretical predictions.
+### Step 2: Execution (PhD Agent)
+1.  **Sub-Task Breakdown**: Create a checklist.
+2.  **Execution Loop**:
+    - **Research**: Read papers, update `bibliography.md`.
+    - **Code**: Plan -> Stub -> Implement.
+    - **Log**: Update `skill.md` with lessons learned.
 
-### Step 4: Documentation & Review
-- Update `README.md` with new findings.
-- Commit changes with descriptive messages (e.g., `feat:`, `docs:`, `analysis:`).
-- Generate reports if needed.
+### Step 3: Reporting & Review
+1.  **Update Queue**: Set status to `[Review]`.
+2.  **Writer Trigger**:
+    - Generate `.typ` report in `reports/`.
+    - Commit changes with standardized messages.
 
-## 4. Best Practices
-- **Theory First**: Never code without a plan.
-- **Atomic Commits**: Keep changes small and focused.
-- **Reproducibility**: Ensure all data generation scripts are included in `/code`.
+### Step 4: PI Evaluation
+- **Success**: Mark `[Completed]` and plan next task.
+- **Failure**: Trigger **Escalation Protocol**.
+
+## 4. Input/Output Specifications
+
+### Task Queue Format
+See `task_queue.md`. All tasks must track `Tool Calls` and `Budget`.
+
+### Escalation Report
+See `escalation_protocol.md`. Use when blocked or finding conflicts.
+
+## 5. Environment & Dependencies
+- **Language**: [Primary Language, e.g., Julia/Python]
+- **Tools**: Zotero, Typst (for reports), Git.
+- **Key Files**:
+    - `research_plan.md`: High-level roadmap.
+    - `skill.md`: Shared memory of "what works".

@@ -2,14 +2,15 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
-| T-045 | High | Deep Dive: Adler et al. 2017 (Poly-time Linear RW) | PhD-Theory | **[Completed]** | 3 | 5 | [Adler 2017] |
-| T-046 | Medium | Deep Dive: Korhonen 2024 (Prefix Rebuilding Details) | PhD-Algo | **[Completed]** | 3 | 5 | [Korhonen 2024] |
+| T-047 | High | Deep Dive: Bonnet et al. 2021 (Twin-Width) | PhD-Theory | **[Completed]** | 3 | 5 | [Bonnet 2021] |
+| T-048 | Medium | Deep Dive: Bergougnoux 2023 (Tight Lower Bounds) | PhD-Theory | **[Pending]** | 0 | 5 | [Bergougnoux 2023] |
 | T-044 | Low | Implement SVD-based Cut Heuristic | PhD-Algo | **[Suspended]** | 0 | 5 | [Anand 2025] |
 | T-037 | Medium | Documentation and Final Report | PhD-Theory | **[Completed]** | 3 | 10 | [Final] |
 
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-22 | T-047 | Completed | PhD-Theory | Analyzed Bonnet 2021. Concluded Twin-Width is less relevant for contraction cost than Rank-Width. |
 | 2025-12-22 | T-046 | Completed | PhD-Algo | Researched "Prefix Rebuilding" in Korhonen 2024. Confirmed it's an advanced dynamic technique; simpler "Local Refinement" is sufficient for current O(n^2) goals. |
 | 2025-12-22 | T-045 | Completed | PhD-Theory | Researched Adler 2017. Identified Canonical Split Decomposition as key for exact DH graph solver. |
 
