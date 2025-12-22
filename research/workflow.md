@@ -114,6 +114,13 @@ The PI Agent reviews the output.
 - **Success:** If the task is complete and verified, the PI generates the prompt for the *next* task.
 - **Failure/Blocker:** If the task failed or is stalled, the PI triggers the Escalation Protocol.
 
+### Step 5: Version Control Checkpoint
+**Trigger:** After any task completion or significant file modification.
+- **Action:**
+    1.  **Status Check:** Ensure the code compiles and tests pass (if applicable).
+    2.  **Commit:** Perform a Git commit with a descriptive message following Conventional Commits (e.g., `feat:`, `docs:`, `test:`).
+    3.  **Log:** Confirm the commit hash in the internal log (optional).
+
 ## 4. Environment Setup
 
 ### Dependencies

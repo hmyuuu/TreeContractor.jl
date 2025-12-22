@@ -1,12 +1,16 @@
-## Active Queue (Theory Focus)
+## Active Queue (Deep Research Focus)
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
+| T-045 | High | Deep Dive: Adler et al. 2017 (Poly-time Linear RW) | PhD-Theory | **[Pending]** | 0 | 5 | [Adler 2017] |
+| T-046 | Medium | Deep Dive: Korhonen 2024 (Prefix Rebuilding Details) | PhD-Algo | **[Pending]** | 0 | 5 | [Korhonen 2024] |
+| T-044 | Low | Implement SVD-based Cut Heuristic | PhD-Algo | **[Suspended]** | 0 | 5 | [Anand 2025] |
 | T-037 | Medium | Documentation and Final Report | PhD-Theory | **[Completed]** | 3 | 10 | [Final] |
 
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-22 | T-044 | Pending | All Agents | Group Meeting: Anand 2025. Identified "Rank-Expansion" and SVD heuristic. Added to queue. |
 | 2025-12-22 | T-037 | Completed | PhD-Theory | Generated `final_report.typ` and `README.md`. Consolidated all findings. |
 | 2025-12-22 | T-043 | Completed | PhD-Algo | Implemented `DynamicRankWidth.jl` with `add_edge!` and `DynamicGraph`. Verified incremental P4 and C5 construction. |
 | 2025-12-22 | T-042 | Completed | PhD-Algo | Implemented Enhanced Refinement in `LocalSearch.jl`. Now minimizes `Max(LocalEdges)` and breaks ties with `CentralEdge`. Verified on P4 (2->1). |
