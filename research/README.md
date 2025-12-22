@@ -35,6 +35,21 @@ We distinguish between two types of problems solvable on Rank-Decompositions (Be
 *   **Exception (Positive Bias)**: If the tensor network has non-negative entries with positive bias, approximate contraction is possible in quasi-polynomial time $n^{O(\log n)}$, even for high rank-width (Jiang et al., 2024).
 *   **Canonization**: Graph Isomorphism for rank-width $k$ is in $TC^2$ (Levet et al., 2024). This allows efficient caching of sub-results by canonical labeling.
 
+## 📈 Benchmarks
+
+We provide a suite of "Hard Graphs" to stress-test the solver (see `benchmark/hard_graphs.jl`).
+
+| Graph Type | Description | Rank-Width Behavior |
+| :--- | :--- | :--- |
+| **Random $G(n, 0.5)$** | Generic dense graph | High ($\sim n/3$). Good for worst-case testing. |
+| **Grid $m \times n$** | 2D Lattice (Tensor Network) | $\min(m, n)$. Tests structure recognition. |
+| **Paley Graph $P_q$** | Deterministic Expander | High. Tests solver on "quasi-random" structures. |
+
+To run the stress test:
+```bash
+julia benchmark_stress.jl
+```
+
 ## 🛠️ Usage
 
 ### 1. Installation
