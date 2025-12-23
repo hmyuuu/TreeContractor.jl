@@ -6,7 +6,7 @@
 | T-077 | Medium | Deep Dive: Adler et al. (2017) - Linear RW of Distance-Hereditary I | PhD-Algo | **[Completed]** | 3 | 5 | [Adler 2017] |
 | T-078 | Medium | Deep Dive: Eiben et al. (2022) - Unifying Framework for Width Measures | PhD-Theory | **[Completed]** | 3 | 5 | [Eiben 2022] |
 | T-079 | Medium | Deep Dive: Fomin-Korhonen (2021) - Fast FPT-Approximation Branchwidth | PhD-Algo | **[Completed]** | 3 | 5 | [Fomin 2021] |
-| T-080 | Low | Deep Dive: McCarty - Local Structure for Vertex-Minors | PhD-Theory | **[Pending]** | 0 | 5 | [McCarty] |
+| T-080 | Low | Deep Dive: McCarty - Local Structure for Vertex-Minors | PhD-Theory | **[Completed]** | 3 | 5 | [McCarty] |
 
 ## Completed Research Tasks (Recent)
 
@@ -41,6 +41,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-23 | T-080 | Completed | PhD-Theory | Analyzed McCarty 2022 (joint with Geelen, Wollan). Vertex-minor analog of Robertson-Seymour structure theorem. KEY: Circle graphs replace planar graphs. Local Structure Theorem: proper vertex-minor-closed classes decompose into "almost circle graphs". Grid theorem: bounded rw ↔ excludes comparability grids as vertex-minors. Tour graphs for prime circle graphs. Quantum computing connection: graph states. |
 | 2025-12-23 | T-079 | Completed | PhD-Algo | Analyzed Fomin-Korhonen 2021. BREAKTHROUGH: First sub-cubic rw algorithm! 2^{2^{O(k)}} n² for 2-approx rw (breaks n³ barrier). Key: "Refinement" operations + W-improvement detection + potential function amortization. Also 2^{O(k)} n for graph branchwidth. Framework for general connectivity functions. |
 | 2025-12-23 | T-078 | Completed | PhD-Theory | Analyzed Eiben et al. 2022. F-branchwidth unifies treewidth, clique-width, mim-width. KEY: Only 6 si ph classes exist (F∅, F=, F≤, F<, F≠, F*). Only 3 primal families (F=, F≤, F≠) needed for 3-approximation! FPT algorithms for mim-width under tw+Δ, treedepth. Linear kernel for FES. |
 | 2025-12-23 | T-077 | Completed | PhD-Algo | Analyzed Adler et al. 2017. Linear RW of distance-hereditary graphs in O(n² log² n). Key innovation: "limbs" for canonical split decompositions. Characterization: ≤2 components with f(B,T)=k, others ≤k-1. Corollary: matroid path-width for bw≤2. Path-width on DH graphs is NP-hard! |
