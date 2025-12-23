@@ -2,13 +2,23 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
+| T-076 | High | Deep Dive: Oum-Seymour (2006) - Approximating Clique-Width & Branch-Width | PhD-Algo | **[Completed]** | 3 | 5 | [Oum-Seymour 2006] |
+| T-077 | Medium | Deep Dive: Adler et al. (2017) - Linear RW of Distance-Hereditary I | PhD-Algo | **[In Progress]** | 0 | 5 | [Adler 2017] |
+| T-078 | Medium | Deep Dive: Eiben et al. (2022) - Unifying Framework for Width Measures | PhD-Theory | **[Pending]** | 0 | 5 | [Eiben 2022] |
+| T-079 | Medium | Deep Dive: Fomin-Korhonen (2021) - Fast FPT-Approximation Branchwidth | PhD-Algo | **[Pending]** | 0 | 5 | [Fomin 2021] |
+| T-080 | Low | Deep Dive: McCarty - Local Structure for Vertex-Minors | PhD-Theory | **[Pending]** | 0 | 5 | [McCarty] |
+
+## Completed Research Tasks (Recent)
+
+| ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
+|----|----------|------------------|-------------|--------|------------|--------|-------|
 | T-071 | High | Deep Dive: Oum (2017) - Survey: Algorithmic & Structural Results | PhD-Theory | **[Completed]** | 3 | 5 | [Oum Survey 2017] |
 | T-072 | High | Deep Dive: Oum (2009) - Computing Rank-Width Exactly | PhD-Algo | **[Completed]** | 3 | 5 | [Oum Exact 2009] |
 | T-073 | Medium | Deep Dive: Ganian (2011) - Thread Graphs & Linear Rank-Width | PhD-Theory | **[Completed]** | 3 | 5 | [Ganian Thread 2011] |
 | T-074 | Medium | Deep Dive: Oum - Approximating Rank-Width Quickly | PhD-Algo | **[Completed]** | 3 | 5 | [Oum Approx] |
 | T-075 | Low | Deep Dive: Fujita (2023) - Obstruction Survey | PhD-Theory | **[Completed]** | 3 | 5 | [Fujita 2023] |
 
-## Completed Research Tasks
+## Completed Research Tasks (Earlier)
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
@@ -31,6 +41,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-23 | T-076 | Completed | PhD-Algo | Analyzed Oum-Seymour 2006 FOUNDATIONAL paper. Introduces rank-width = bw(cutrk). Well-linked sets technique. rwd ≤ cwd ≤ 2^(rwd+1)-1. O(n^9 log n) for (3k+1)-approx. Uses submodular function minimization. |
 | 2025-12-23 | T-075 | Completed | PhD-Theory | Analyzed Fujita 2023 Obstruction Survey. ρ-tangles (T1-T3), ρ-ultrafilters (F1-F4) for rank-width. ρ-obstacles (O1-O3), ρ-linear-tangles (L1-L3), ρ-single-ultrafilters for linear rank-width. Duality theorems: obstruction of order k ↔ width ≥ k. |
 | 2025-12-23 | T-074 | Completed | PhD-Algo | Analyzed Oum 2008 Approximation. Three algorithms: O(n^4) 3k+1 (blocking sequences), O(n^3) 24k (matroids), O(n^3) 3k-1 (MSO logic). Foundation for Queyranne.jl. Pivoting preserves cut-rank. |
 | 2025-12-23 | T-073 | Completed | PhD-Theory | Analyzed Ganian 2011. Linear rank-width 1 = Thread graphs. Constructive characterization via 𝒜/𝒫, 𝒥/𝒟, ℛ attributes. P-time algorithms for bandwidth (2-approx), dominating bandwidth, path-width (NP-hard on trees!). |
