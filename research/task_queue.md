@@ -2,6 +2,16 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
+| T-071 | High | Deep Dive: Oum (2017) - Survey: Algorithmic & Structural Results | PhD-Theory | **[Completed]** | 3 | 5 | [Oum Survey 2017] |
+| T-072 | High | Deep Dive: Oum (2009) - Computing Rank-Width Exactly | PhD-Algo | **[In Progress]** | 0 | 5 | [Oum Exact 2009] |
+| T-073 | Medium | Deep Dive: Ganian (2011) - Thread Graphs & Linear Rank-Width | PhD-Theory | **[Pending]** | 0 | 5 | [Ganian Thread 2011] |
+| T-074 | Medium | Deep Dive: Oum - Approximating Rank-Width Quickly | PhD-Algo | **[Pending]** | 0 | 5 | [Oum Approx] |
+| T-075 | Low | Deep Dive: Fujita (2023) - Obstruction Survey | PhD-Theory | **[Pending]** | 0 | 5 | [Fujita 2023] |
+
+## Completed Research Tasks
+
+| ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
+|----|----------|------------------|-------------|--------|------------|--------|-------|
 | T-067 | High | Deep Dive: Courcelle & Kanté (2007) - Bilinear Graph Operations | PhD-Theory | **[Completed]** | 3 | 5 | [Courcelle 2007] |
 | T-068 | High | Deep Dive: Oum (2005) - Vertex-Minors & Pivoting (Enhanced) | PhD-Theory | **[Completed]** | 3 | 5 | [Oum 2005] |
 | T-069 | Medium | Deep Dive: Di Lavore & Sobociński (2023) - Monoidal Width (Category Theory) | PhD-Theory | **[Completed]** | 3 | 5 | [DiLavore 2023] |
@@ -21,6 +31,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-23 | T-071 | Completed | PhD-Theory | Analyzed Oum 2017 Survey. Comprehensive reference: rw ≈ cw (exp), FPT algorithms, 3k+1 approx in O(8^k n^4), WQO by pivot-minors, finite obstructions, tangles, open questions (c<3 runtime, circle graphs, pivot-minor WQO). |
 | 2025-12-23 | T-070 | Completed | PhD-Theory | Analyzed Oum WQO paper. Graphs of bounded rank-width are WQO by vertex-minors. Finite obstruction sets exist. Uses isotropic systems (Bouchet). Implies binary matroid WQO. |
 | 2025-12-23 | T-069 | Completed | PhD-Theory | Analyzed Di Lavore & Sobociński 2023. Monoidal width captures rank-width with factor of 2. Category-theoretic unification of graph width measures. Rank-Width ↔ Linear Algebra (Matrices). |
 | 2025-12-23 | T-068 | Completed | PhD-Theory | Analyzed Oum 2005. Vertex-minors = "right" containment for rank-width. Excluded vertex-minor characterization with bounded obstructions. Distance-hereditary ↔ rw ≤ 1. Binary matroid connection via fundamental graphs. |
