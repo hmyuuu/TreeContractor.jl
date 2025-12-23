@@ -2,9 +2,9 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
-| T-064 | Medium | Deep Dive: Nešetřil et al. (2021) - Rankwidth Meets Stability | PhD-Theory | **[In Progress]** | 3 | 5 | [Nešetřil 2021] |
-| T-065 | Medium | Deep Dive: Bouchet (1987) - Isotropic Systems | PhD-Theory | **[Pending]** | 3 | 5 | [Bouchet 1987] |
-| T-066 | Medium | Deep Dive: Ganian & Hliněný (2010) - Parse Trees & Myhill-Nerode | PhD-Theory | **[Pending]** | 3 | 5 | [Ganian 2010] |
+| T-064 | Medium | Deep Dive: Nešetřil et al. (2021) - Rankwidth Meets Stability | PhD-Theory | **[Completed]** | 3 | 5 | [Nešetřil 2021] |
+| T-065 | Medium | Deep Dive: Bouchet (1987) - Isotropic Systems | PhD-Theory | **[Completed]** | 3 | 5 | [Bouchet 1987] |
+| T-066 | Medium | Deep Dive: Ganian & Hliněný (2010) - Parse Trees & Myhill-Nerode | PhD-Theory | **[Completed]** | 3 | 5 | [Ganian 2010] |
 
 ## Deferred / Future Implementation
 
@@ -17,6 +17,9 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-23 | T-066 | Completed | PhD-Theory | Analyzed Ganian & Hliněný 2010. Parse Trees = algebraic view of rank-decompositions. Myhill-Nerode theorem validates our DP approach. Single-exponential $2^{O(t^2)}$ algorithms. |
+| 2025-12-23 | T-065 | Completed | PhD-Theory | Analyzed Bouchet 1987. Isotropic Systems = algebraic foundation of rank-width. Local complementation, circle graphs, distance-hereditary = linear RW ≤ 1. |
+| 2025-12-23 | T-064 | Completed | PhD-Theory | Analyzed Nešetřil et al. 2021. "Grand Unification" of sparse/dense theory. FO transductions + stability ↔ bounded rank-width. |
 | 2025-12-22 | T-061 | Completed | PhD-Theory | Analyzed Langer et al. 2011. Game Theory $\equiv$ Top-Down DP. |
 | 2025-12-22 | T-060 | Completed | PhD-Theory | Analyzed Kwon et al. 2020. Low Rank-Width Colorings. |
 | 2025-12-22 | T-059 | Completed | PhD-Theory | Analyzed Alecu et al. 2025. "Lettericity" $\implies$ Linear Rank-Width. Benchmark source. |

@@ -29,5 +29,27 @@ This is a deep structural result that explains *why* rank-width works for "struc
 -   **Algorithmic Consequence:** If we have a graph of bounded rank-width, we can effectively treat it as a "distorted" tree-width graph.
 -   **Verification:** This justifies our use of **Dynamic Programming on the Decomposition Tree**. The decomposition tree *is* the "sparse backbone" that the transduction theorem predicts exists.
 
-## 5. Conclusion
+## 5. Additional Results from Abstract
+
+### Consequence: Linear χ-Boundedness
+A significant corollary: classes with bounded rank-width excluding some **half-graph** as a semi-induced subgraph are **linearly χ-bounded**. This means:
+- Chromatic number is bounded by a linear function of clique number.
+- Provides concrete graph coloring algorithms for these classes.
+
+### Algorithmic Aspect
+- Proofs are **effective** and lead to **polynomial-time algorithms**.
+- This is crucial for practical implementation: the theoretical connection to transductions is not just existential—it's constructive.
+
+## 6. Connection to Half-Graphs
+The **half-graph** $H_n$ is the bipartite graph with vertices $a_1, \ldots, a_n$ and $b_1, \ldots, b_n$ where $a_i$ is adjacent to $b_j$ iff $i \le j$.
+- Half-graphs capture "order-like" structure.
+- Excluding half-graphs as semi-induced subgraphs implies the edge relation is "stable" in the model-theoretic sense.
+
+## 7. Conclusion
 Nešetřil et al. (2021) provide the "Grand Unification" of Sparse and Dense structural theory. For our project, it confirms that **Rank-Decomposition is the correct "Sparse Skeleton" for dense graphs**.
+
+**Key Takeaway for Implementation:**
+- When graphs have bounded rank-width AND exclude half-graphs, we get extra algorithmic bonuses (linear χ-boundedness, polynomial algorithms).
+- This justifies using rank-decomposition as the structural backbone for dynamic programming.
+
+**Status:** ✅ Completed
