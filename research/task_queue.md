@@ -4,7 +4,7 @@
 |----|----------|------------------|-------------|--------|------------|--------|-------|
 | T-076 | High | Deep Dive: Oum-Seymour (2006) - Approximating Clique-Width & Branch-Width | PhD-Algo | **[Completed]** | 3 | 5 | [Oum-Seymour 2006] |
 | T-077 | Medium | Deep Dive: Adler et al. (2017) - Linear RW of Distance-Hereditary I | PhD-Algo | **[Completed]** | 3 | 5 | [Adler 2017] |
-| T-078 | Medium | Deep Dive: Eiben et al. (2022) - Unifying Framework for Width Measures | PhD-Theory | **[In Progress]** | 0 | 5 | [Eiben 2022] |
+| T-078 | Medium | Deep Dive: Eiben et al. (2022) - Unifying Framework for Width Measures | PhD-Theory | **[Completed]** | 3 | 5 | [Eiben 2022] |
 | T-079 | Medium | Deep Dive: Fomin-Korhonen (2021) - Fast FPT-Approximation Branchwidth | PhD-Algo | **[Pending]** | 0 | 5 | [Fomin 2021] |
 | T-080 | Low | Deep Dive: McCarty - Local Structure for Vertex-Minors | PhD-Theory | **[Pending]** | 0 | 5 | [McCarty] |
 
@@ -41,6 +41,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-23 | T-078 | Completed | PhD-Theory | Analyzed Eiben et al. 2022. F-branchwidth unifies treewidth, clique-width, mim-width. KEY: Only 6 si ph classes exist (F∅, F=, F≤, F<, F≠, F*). Only 3 primal families (F=, F≤, F≠) needed for 3-approximation! FPT algorithms for mim-width under tw+Δ, treedepth. Linear kernel for FES. |
 | 2025-12-23 | T-077 | Completed | PhD-Algo | Analyzed Adler et al. 2017. Linear RW of distance-hereditary graphs in O(n² log² n). Key innovation: "limbs" for canonical split decompositions. Characterization: ≤2 components with f(B,T)=k, others ≤k-1. Corollary: matroid path-width for bw≤2. Path-width on DH graphs is NP-hard! |
 | 2025-12-23 | T-076 | Completed | PhD-Algo | Analyzed Oum-Seymour 2006 FOUNDATIONAL paper. Introduces rank-width = bw(cutrk). Well-linked sets technique. rwd ≤ cwd ≤ 2^(rwd+1)-1. O(n^9 log n) for (3k+1)-approx. Uses submodular function minimization. |
 | 2025-12-23 | T-075 | Completed | PhD-Theory | Analyzed Fujita 2023 Obstruction Survey. ρ-tangles (T1-T3), ρ-ultrafilters (F1-F4) for rank-width. ρ-obstacles (O1-O3), ρ-linear-tangles (L1-L3), ρ-single-ultrafilters for linear rank-width. Duality theorems: obstruction of order k ↔ width ≥ k. |
