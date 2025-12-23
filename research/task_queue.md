@@ -6,7 +6,7 @@
 | T-072 | High | Deep Dive: Oum (2009) - Computing Rank-Width Exactly | PhD-Algo | **[Completed]** | 3 | 5 | [Oum Exact 2009] |
 | T-073 | Medium | Deep Dive: Ganian (2011) - Thread Graphs & Linear Rank-Width | PhD-Theory | **[Completed]** | 3 | 5 | [Ganian Thread 2011] |
 | T-074 | Medium | Deep Dive: Oum - Approximating Rank-Width Quickly | PhD-Algo | **[Completed]** | 3 | 5 | [Oum Approx] |
-| T-075 | Low | Deep Dive: Fujita (2023) - Obstruction Survey | PhD-Theory | **[In Progress]** | 0 | 5 | [Fujita 2023] |
+| T-075 | Low | Deep Dive: Fujita (2023) - Obstruction Survey | PhD-Theory | **[Completed]** | 3 | 5 | [Fujita 2023] |
 
 ## Completed Research Tasks
 
@@ -31,6 +31,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-23 | T-075 | Completed | PhD-Theory | Analyzed Fujita 2023 Obstruction Survey. ρ-tangles (T1-T3), ρ-ultrafilters (F1-F4) for rank-width. ρ-obstacles (O1-O3), ρ-linear-tangles (L1-L3), ρ-single-ultrafilters for linear rank-width. Duality theorems: obstruction of order k ↔ width ≥ k. |
 | 2025-12-23 | T-074 | Completed | PhD-Algo | Analyzed Oum 2008 Approximation. Three algorithms: O(n^4) 3k+1 (blocking sequences), O(n^3) 24k (matroids), O(n^3) 3k-1 (MSO logic). Foundation for Queyranne.jl. Pivoting preserves cut-rank. |
 | 2025-12-23 | T-073 | Completed | PhD-Theory | Analyzed Ganian 2011. Linear rank-width 1 = Thread graphs. Constructive characterization via 𝒜/𝒫, 𝒥/𝒟, ℛ attributes. P-time algorithms for bandwidth (2-approx), dominating bandwidth, path-width (NP-hard on trees!). |
 | 2025-12-23 | T-072 | Completed | PhD-Algo | Analyzed Oum 2009. Exact exponential algorithm: O(2^n n³ log² n log log n). Uses fast subset convolution (Björklund). Improves trivial O(3^n). Applies to rank-width, carving-width, branch-width, matching-width. |
