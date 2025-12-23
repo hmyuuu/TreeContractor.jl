@@ -2,6 +2,10 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
+| T-067 | High | Deep Dive: Courcelle & Kanté (2007) - Bilinear Graph Operations | PhD-Theory | **[Completed]** | 3 | 5 | [Courcelle 2007] |
+| T-068 | High | Deep Dive: Oum (2005) - Vertex-Minors & Pivoting (Enhanced) | PhD-Theory | **[In Progress]** | 0 | 5 | [Oum 2005] |
+| T-069 | Medium | Deep Dive: Di Lavore & Sobociński (2023) - Monoidal Width (Category Theory) | PhD-Theory | **[Pending]** | 0 | 5 | [DiLavore 2023] |
+| T-070 | Medium | Deep Dive: Oum - Well-Quasi-Ordering for Rank-Width | PhD-Theory | **[Pending]** | 0 | 5 | [Oum WQO] |
 | T-064 | Medium | Deep Dive: Nešetřil et al. (2021) - Rankwidth Meets Stability | PhD-Theory | **[Completed]** | 3 | 5 | [Nešetřil 2021] |
 | T-065 | Medium | Deep Dive: Bouchet (1987) - Isotropic Systems | PhD-Theory | **[Completed]** | 3 | 5 | [Bouchet 1987] |
 | T-066 | Medium | Deep Dive: Ganian & Hliněný (2010) - Parse Trees & Myhill-Nerode | PhD-Theory | **[Completed]** | 3 | 5 | [Ganian 2010] |
@@ -17,6 +21,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-23 | T-067 | Completed | PhD-Theory | Analyzed Courcelle & Kanté 2007. Bilinear products $\otimes_{M,N,P}$ characterize rank-width. Foundation for parse trees. Balancing with 2× width. |
 | 2025-12-23 | T-066 | Completed | PhD-Theory | Analyzed Ganian & Hliněný 2010. Parse Trees = algebraic view of rank-decompositions. Myhill-Nerode theorem validates our DP approach. Single-exponential $2^{O(t^2)}$ algorithms. |
 | 2025-12-23 | T-065 | Completed | PhD-Theory | Analyzed Bouchet 1987. Isotropic Systems = algebraic foundation of rank-width. Local complementation, circle graphs, distance-hereditary = linear RW ≤ 1. |
 | 2025-12-23 | T-064 | Completed | PhD-Theory | Analyzed Nešetřil et al. 2021. "Grand Unification" of sparse/dense theory. FO transductions + stability ↔ bounded rank-width. |

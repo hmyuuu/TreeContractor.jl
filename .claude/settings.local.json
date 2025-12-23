@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__zotero__zotero_get_item_fulltext",
+      "mcp__zotero__zotero_get_item_metadata",
+      "Bash(git add:*)"
+    ]
+  }
+}
