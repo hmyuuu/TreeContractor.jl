@@ -2,6 +2,12 @@
 
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
+| T-081 | High | Deep Dive: Korhonen-Sokołowski (2024) - Almost-Linear Time via Dynamic RW | PhD-Algo | **[Completed]** | 3 | 5 | [Korhonen 2024] |
+
+## Completed Research Tasks (Batch 5)
+
+| ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
+|----|----------|------------------|-------------|--------|------------|--------|-------|
 | T-076 | High | Deep Dive: Oum-Seymour (2006) - Approximating Clique-Width & Branch-Width | PhD-Algo | **[Completed]** | 3 | 5 | [Oum-Seymour 2006] |
 | T-077 | Medium | Deep Dive: Adler et al. (2017) - Linear RW of Distance-Hereditary I | PhD-Algo | **[Completed]** | 3 | 5 | [Adler 2017] |
 | T-078 | Medium | Deep Dive: Eiben et al. (2022) - Unifying Framework for Width Measures | PhD-Theory | **[Completed]** | 3 | 5 | [Eiben 2022] |
@@ -41,6 +47,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-23 | T-081 | Completed | PhD-Algo | Analyzed Korhonen-Sokołowski 2024. ULTIMATE BREAKTHROUGH: Almost-linear time O_k(n^{1+o(1)}) + O(m) for rank-width! Key: Dynamic rank decomposition maintenance with amortized O_k(2^{√log n · log log n}) update time. Width 4k under updates. CMSO₁ maintenance at no extra cost. Generalizes dynamic treewidth (FOCS 2023). Validates our DynamicRankWidth.jl approach! |
 | 2025-12-23 | T-080 | Completed | PhD-Theory | Analyzed McCarty 2022 (joint with Geelen, Wollan). Vertex-minor analog of Robertson-Seymour structure theorem. KEY: Circle graphs replace planar graphs. Local Structure Theorem: proper vertex-minor-closed classes decompose into "almost circle graphs". Grid theorem: bounded rw ↔ excludes comparability grids as vertex-minors. Tour graphs for prime circle graphs. Quantum computing connection: graph states. |
 | 2025-12-23 | T-079 | Completed | PhD-Algo | Analyzed Fomin-Korhonen 2021. BREAKTHROUGH: First sub-cubic rw algorithm! 2^{2^{O(k)}} n² for 2-approx rw (breaks n³ barrier). Key: "Refinement" operations + W-improvement detection + potential function amortization. Also 2^{O(k)} n for graph branchwidth. Framework for general connectivity functions. |
 | 2025-12-23 | T-078 | Completed | PhD-Theory | Analyzed Eiben et al. 2022. F-branchwidth unifies treewidth, clique-width, mim-width. KEY: Only 6 si ph classes exist (F∅, F=, F≤, F<, F≠, F*). Only 3 primal families (F=, F≤, F≠) needed for 3-approximation! FPT algorithms for mim-width under tw+Δ, treedepth. Linear kernel for FES. |
