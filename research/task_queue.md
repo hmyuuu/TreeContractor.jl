@@ -5,7 +5,7 @@
 | T-067 | High | Deep Dive: Courcelle & Kanté (2007) - Bilinear Graph Operations | PhD-Theory | **[Completed]** | 3 | 5 | [Courcelle 2007] |
 | T-068 | High | Deep Dive: Oum (2005) - Vertex-Minors & Pivoting (Enhanced) | PhD-Theory | **[Completed]** | 3 | 5 | [Oum 2005] |
 | T-069 | Medium | Deep Dive: Di Lavore & Sobociński (2023) - Monoidal Width (Category Theory) | PhD-Theory | **[Completed]** | 3 | 5 | [DiLavore 2023] |
-| T-070 | Medium | Deep Dive: Oum - Well-Quasi-Ordering for Rank-Width | PhD-Theory | **[In Progress]** | 0 | 5 | [Oum WQO] |
+| T-070 | Medium | Deep Dive: Oum - Well-Quasi-Ordering for Rank-Width | PhD-Theory | **[Completed]** | 3 | 5 | [Oum WQO] |
 | T-064 | Medium | Deep Dive: Nešetřil et al. (2021) - Rankwidth Meets Stability | PhD-Theory | **[Completed]** | 3 | 5 | [Nešetřil 2021] |
 | T-065 | Medium | Deep Dive: Bouchet (1987) - Isotropic Systems | PhD-Theory | **[Completed]** | 3 | 5 | [Bouchet 1987] |
 | T-066 | Medium | Deep Dive: Ganian & Hliněný (2010) - Parse Trees & Myhill-Nerode | PhD-Theory | **[Completed]** | 3 | 5 | [Ganian 2010] |
@@ -21,6 +21,7 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-23 | T-070 | Completed | PhD-Theory | Analyzed Oum WQO paper. Graphs of bounded rank-width are WQO by vertex-minors. Finite obstruction sets exist. Uses isotropic systems (Bouchet). Implies binary matroid WQO. |
 | 2025-12-23 | T-069 | Completed | PhD-Theory | Analyzed Di Lavore & Sobociński 2023. Monoidal width captures rank-width with factor of 2. Category-theoretic unification of graph width measures. Rank-Width ↔ Linear Algebra (Matrices). |
 | 2025-12-23 | T-068 | Completed | PhD-Theory | Analyzed Oum 2005. Vertex-minors = "right" containment for rank-width. Excluded vertex-minor characterization with bounded obstructions. Distance-hereditary ↔ rw ≤ 1. Binary matroid connection via fundamental graphs. |
 | 2025-12-23 | T-067 | Completed | PhD-Theory | Analyzed Courcelle & Kanté 2007. Bilinear products $\otimes_{M,N,P}$ characterize rank-width. Foundation for parse trees. Balancing with 2× width. |
