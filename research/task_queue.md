@@ -3,6 +3,8 @@
 | ID | Priority | Task Description | Assigned To | Status | Tool Calls | Budget | Links |
 |----|----------|------------------|-------------|--------|------------|--------|-------|
 | T-081 | High | Deep Dive: Korhonen-Sokołowski (2024) - Almost-Linear Time via Dynamic RW | PhD-Algo | **[Completed]** | 3 | 5 | [Korhonen 2024] |
+| T-082 | High | Deep Dive: Eiben-Ganian-Szeider (2018) - Well-Structured Modulators | PhD-Theory | **[Completed]** | 3 | 5 | [Eiben 2018] |
+| T-083 | High | Deep Dive: Ganian-Hliněný-Obdržálek (2010) - #SAT/MAX-SAT Algorithms | PhD-Algo | **[Completed]** | 3 | 5 | [Ganian 2010b] |
 
 ## Completed Research Tasks (Batch 5)
 
@@ -47,6 +49,8 @@
 ## Task Log
 | Date | Task ID | Action | Actor | Notes |
 |------|---------|--------|-------|-------|
+| 2025-12-24 | T-083 | Completed | PhD-Algo | Analyzed Ganian-Hliněný-Obdržálek 2010. #SAT/MAX-SAT algorithms with O(t³ · 2^{3t(t+1)/2} · |φ|) complexity. EXPONENTIAL SPEEDUP over clique-width! Key innovation: "Expectation" technique for rank-width DP. Uses labeling parse trees + GF(2) linear algebra. Same framework for MAX-SAT (minimum defect). Practical for small rank-width. |
+| 2025-12-24 | T-082 | Completed | PhD-Theory | Analyzed Eiben-Ganian-Szeider 2018 (Well-Structured Modulators). Novel hybrid parameter wsn_H combining modulators + rank-width. KEY: wsn_H can be exponentially smaller than both rw(G) and mod_H(G)! FPT algorithm for finding well-structured modulators. Applications: MinVC, MaxClq, MSO model checking all FPT. LinEMSO optimization remains hard (tight characterization). |
 | 2025-12-23 | T-081 | Completed | PhD-Algo | Analyzed Korhonen-Sokołowski 2024. ULTIMATE BREAKTHROUGH: Almost-linear time O_k(n^{1+o(1)}) + O(m) for rank-width! Key: Dynamic rank decomposition maintenance with amortized O_k(2^{√log n · log log n}) update time. Width 4k under updates. CMSO₁ maintenance at no extra cost. Generalizes dynamic treewidth (FOCS 2023). Validates our DynamicRankWidth.jl approach! |
 | 2025-12-23 | T-080 | Completed | PhD-Theory | Analyzed McCarty 2022 (joint with Geelen, Wollan). Vertex-minor analog of Robertson-Seymour structure theorem. KEY: Circle graphs replace planar graphs. Local Structure Theorem: proper vertex-minor-closed classes decompose into "almost circle graphs". Grid theorem: bounded rw ↔ excludes comparability grids as vertex-minors. Tour graphs for prime circle graphs. Quantum computing connection: graph states. |
 | 2025-12-23 | T-079 | Completed | PhD-Algo | Analyzed Fomin-Korhonen 2021. BREAKTHROUGH: First sub-cubic rw algorithm! 2^{2^{O(k)}} n² for 2-approx rw (breaks n³ barrier). Key: "Refinement" operations + W-improvement detection + potential function amortization. Also 2^{O(k)} n for graph branchwidth. Framework for general connectivity functions. |
